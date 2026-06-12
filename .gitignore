@@ -1,0 +1,17 @@
+*.vsidx
+*.vsidx
+*.vsidx
+TeamDevelopment_team1/.vs/TeamDevelopment_team1.slnx/FileContentIndex/23a119a5-7c49-485c-a67b-e8ba349d8a70.vsidx
+*.vsidx
+*.vsidx
+
+# Visual Studio のキャッシュ・個人設定
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ビルド出力（コンパイルされたファイルなど）
+bin/
+obj/
