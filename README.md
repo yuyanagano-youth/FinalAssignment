@@ -1,4 +1,4 @@
-[Final Assignment design doc.xlsx](https://github.com/user-attachments/files/28936863/Final.Assignment.design.doc.xlsx)
+
 #  画面構成と機能要件(画面レイアウト)
 
 
