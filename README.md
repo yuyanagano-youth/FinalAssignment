@@ -4,5 +4,5 @@
 [要件定義(Requirement status).pdf](https://github.com/user-attachments/files/28944394/Requirement.status.pdf)
 
 
-[コンソール側の要件定義.md](https://github.com/user-attachments/files/28941641/default.md)
+[コンソール側の要件定義.txt](https://github.com/user-attachments/files/28944500/default.txt)
 
