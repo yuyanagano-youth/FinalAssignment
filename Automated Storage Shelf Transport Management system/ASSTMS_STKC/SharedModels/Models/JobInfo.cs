@@ -1,4 +1,4 @@
-﻿namespace ASSTMS_STKC.Models
+﻿namespace ASSTMS_STKC.SharedModels.Models
 {
     public class JobInfo
     {
