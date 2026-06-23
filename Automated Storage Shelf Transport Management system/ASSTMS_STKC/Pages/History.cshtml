@@ -1,4 +1,26 @@
 ﻿@page
 @model ASSTMS_STKC.Pages.HistoryModel
 @{
+    ViewData["Title"] = "History";
+}
+
+<!-- ============================================================
+     SCR-005: 履歴ログ (Event Log)
+     対応機能: F-006
+     データベースに保存された最新のシステム警告・トランザクション履歴(最新10件)
+============================================================= -->
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0">履歴ログ（最新10件）</h6>
+    <button id="btnRefreshLogs" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-clockwise"></i> 更新
+    </button>
+</div>
+
+<div id="logList">
+    <!-- page-history.js がログ行を動的に挿入する -->
+</div>
+
+@section Scripts {
+    <script src="~/js/page-history.js"></script>
 }

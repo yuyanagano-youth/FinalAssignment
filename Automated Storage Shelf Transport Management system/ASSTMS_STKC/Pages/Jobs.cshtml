@@ -1,4 +1,26 @@
 ﻿@page
 @model ASSTMS_STKC.Pages.JobsModel
 @{
+    ViewData["Title"] = "Jobs";
+}
+
+<!-- ============================================================
+     SCR-004: ジョブ監視 (Queue Monitor)
+     対応機能: F-004
+     PENDING / RUNNING のジョブを一覧表示し、DELETEで削除できる。
+============================================================= -->
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0">アクティブジョブ一覧</h6>
+    <button id="btnRefreshJobs" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-clockwise"></i> 更新
+    </button>
+</div>
+
+<div id="jobList">
+    <!-- page-jobs.js がジョブカードを動的に挿入する -->
+</div>
+
+@section Scripts {
+    <script src="~/js/page-jobs.js"></script>
 }

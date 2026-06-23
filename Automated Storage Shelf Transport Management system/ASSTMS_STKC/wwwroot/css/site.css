@@ -1,31 +1,305 @@
-html {
-  font-size: 14px;
+/* ============================================================================
+   site.css
+   モバイル(Android 16:9)優先のApp Shellスタイル。
+   固定ヘッダー・固定ボトムナビ・ステータスバッジ・棚グリッドの色分けを定義する。
+============================================================================ */
+
+:root {
+    --app-header-h: 52px;
+    --app-bottomnav-h: 64px;
+    --color-bg: #0f1115;
+    --color-surface: #ffffff;
+    --color-online: #2e7d32;
+    --color-offline: #9e9e9e;
+    --color-idle: #2e7d32;
+    --color-traveling: #1565c0;
+    --color-loadlock: #6a1b9a;
+    --color-unloadlock: #6a1b9a;
+    --color-alarm: #c62828;
+    --color-unknown: #757575;
+    --shelf-empty: #bdbdbd;
+    --shelf-occupied: #fbc02d;
+    --shelf-alarm: #e53935;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+* {
+    box-sizing: border-box;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #eef1f4;
+    font-family: "Segoe UI", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    /* 16:9のAndroid縦画面を想定し、横スクロールは発生させない */
+    overflow-x: hidden;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+/* ===== ヘッダー（App Shell固定） ===== */
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--app-header-h);
+    background-color: #0d1b2a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 
-body {
-  margin-bottom: 60px;
+.app-header-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.conn-indicator i {
+    font-size: 0.65rem;
+    color: var(--color-online);
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.conn-indicator.offline i {
+    color: var(--color-offline);
+}
+
+/* ===== メインコンテンツ ===== */
+.app-main {
+    padding-top: calc(var(--app-header-h) + 10px);
+    padding-bottom: calc(var(--app-bottomnav-h) + 16px);
+    padding-left: 12px;
+    padding-right: 12px;
+    min-height: 100vh;
+    max-width: 480px; /* スマホ縦画面想定。広い画面でも中央寄せでアスペクトを保つ */
+    margin: 0 auto;
+}
+
+/* ===== 固定ボトムナビゲーションバー ===== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--app-bottomnav-h);
+    background-color: #fff;
+    display: flex;
+    border-top: 1px solid #dcdfe3;
+    z-index: 1000;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-decoration: none;
+    color: #8a8f98;
+    font-size: 0.68rem;
+    padding-top: 4px;
+}
+
+    .nav-item i {
+        font-size: 1.25rem;
+    }
+
+    .nav-item.active {
+        color: #0d1b2a;
+        font-weight: 600;
+    }
+
+        .nav-item.active i {
+            color: #1565c0;
+        }
+
+/* ===== 共通カード ===== */
+.amhs-card {
+    background: var(--color-surface);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* ===== ステータスバッジ：接続状態 ===== */
+.badge-online {
+    background-color: var(--color-online);
+    color: #fff;
+}
+
+.badge-offline {
+    background-color: var(--color-offline);
+    color: #fff;
+}
+
+/* ===== ステータスバッジ：稼働状態 (OperationState) ===== */
+.badge-idle {
+    background-color: var(--color-idle);
+    color: #fff;
+}
+
+.badge-traveling {
+    background-color: var(--color-traveling);
+    color: #fff;
+}
+
+.badge-load-lock {
+    background-color: var(--color-loadlock);
+    color: #fff;
+}
+
+.badge-unload-lock {
+    background-color: var(--color-unloadlock);
+    color: #fff;
+}
+
+.badge-alarm {
+    background-color: var(--color-alarm);
+    color: #fff;
+    animation: blink-alarm 1s infinite;
+}
+
+.badge-unknown {
+    background-color: var(--color-unknown);
+    color: #fff;
+}
+
+@keyframes blink-alarm {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.55;
+    }
+}
+
+/* ===== ジョブステータスバッジ ===== */
+.badge-job-pending {
+    background-color: #f9a825;
+    color: #212121;
+}
+
+.badge-job-running {
+    background-color: #1565c0;
+    color: #fff;
+}
+
+.badge-job-completed {
+    background-color: #2e7d32;
+    color: #fff;
+}
+
+.badge-job-aborted {
+    background-color: #c62828;
+    color: #fff;
+}
+
+/* ===== ストッカー一覧カード：OFFLINE時のグレーアウト (R-004) ===== */
+.stocker-card.is-offline {
+    opacity: 0.55;
+    filter: grayscale(40%);
+}
+
+/* ===== 棚・在庫グリッド (SCR-003) ===== */
+.shelf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.shelf-cell {
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #212121;
+    cursor: pointer;
+    transition: transform 0.12s ease;
+    border: 2px solid rgba(0,0,0,0.05);
+}
+
+    .shelf-cell:active {
+        transform: scale(0.94);
+    }
+
+    .shelf-cell.empty {
+        background-color: var(--shelf-empty);
+        color: #424242;
+    }
+
+    .shelf-cell.occupied {
+        background-color: var(--shelf-occupied);
+    }
+
+    .shelf-cell.alarm {
+        background-color: var(--shelf-alarm);
+        color: #fff;
+    }
+
+    .shelf-cell .shelf-name {
+        font-size: 0.62rem;
+        opacity: 0.75;
+    }
+
+/* ===== アラートエリア (#alertArea) ===== */
+#alertArea {
+    display: none;
+    background-color: #fdecea;
+    border: 1px solid var(--color-alarm);
+    color: #b71c1c;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+}
+
+    #alertArea.show {
+        display: block;
+    }
+
+/* ===== ポーリング/通信テストログパネル ===== */
+.poll-log-panel {
+    background: #11151c;
+    color: #9be38a;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 0.68rem;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+    .poll-log-panel .log-line {
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+
+        .poll-log-panel .log-line.err {
+            color: #ff8a80;
+        }
+
+/* ===== フォーム要素のモバイル最適化 ===== */
+.form-label-sm {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.btn-block-mobile {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 1rem;
+    border-radius: 10px;
 }

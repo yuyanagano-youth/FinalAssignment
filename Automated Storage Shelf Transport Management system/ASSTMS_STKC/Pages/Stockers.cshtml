@@ -1,4 +1,28 @@
 ﻿@page
 @model ASSTMS_STKC.Pages.StockersModel
 @{
+    ViewData["Title"] = "Stockers";
+}
+
+<!-- ============================================================
+     SCR-002: ストッカー一覧 (Equipment Registry)
+     対応機能: F-009
+     プレーンなテーブルの代わりにBootstrapカードを使用する（外部設計書指定）
+     R-004: connectionStatus == 'OFFLINE' の行はカード全体をグレーアウト
+============================================================= -->
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0">ストッカー一覧</h6>
+    <button id="btnRefreshStockers" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-clockwise"></i> 更新
+    </button>
+</div>
+
+<div id="stockerCardList">
+    <!-- page-stockers.js がカードを動的に挿入する -->
+</div>
+
+@section Scripts {
+    <script src="~/js/page-stockers.js"></script>
+
 }
