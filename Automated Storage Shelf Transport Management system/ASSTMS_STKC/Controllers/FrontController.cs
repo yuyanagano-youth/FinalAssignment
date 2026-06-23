@@ -145,7 +145,7 @@ namespace ASSTMS_STKC.Controllers
             else
             {
                 // stockerId が指定された場合（フィルター検索）
-                LogList = _shelfRepository.GetAllLogs(stockerId);
+                LogList = _logRepository.GetAllLogs(stockerId);
             }
 
             // 通信用の record（LogIndexRes）のリストに詰め替える
@@ -204,7 +204,8 @@ namespace ASSTMS_STKC.Controllers
             else if (req.Command == "STOP")
             {
                 //実際は別クラスでバリテーションチェック
-                bool success = StubCommandService.SendStopCommandAsync();
+                //bool success = StubCommandService.SendStopCommandAsync();
+                bool success = true;
 
                 if (success == true)
                 {
@@ -215,6 +216,11 @@ namespace ASSTMS_STKC.Controllers
                 {
                     return BadRequest();
                 }
+            }
+
+            else
+            {
+                return BadRequest();
             }
         }
     }
