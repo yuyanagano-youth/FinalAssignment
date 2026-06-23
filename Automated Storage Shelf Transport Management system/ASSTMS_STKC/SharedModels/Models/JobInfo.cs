@@ -3,7 +3,7 @@
     public class JobInfo
     {
         public string JobId { get; set; }
-        public string StokerId { get; set; }
+        public string StockerId { get; set; }
         public string CarrierId { get; set; }
         public string SourceLocation { get; set; }
         public string DestLocation { get; set; }

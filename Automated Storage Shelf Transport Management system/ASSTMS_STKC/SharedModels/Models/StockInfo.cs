@@ -2,6 +2,7 @@
 {
     public class StockInfo
     {
+        public string StockerId { get; set; }
         public string StockerName { get; set; }
         public string Status { get; set; }
         public string ConnectionStatus { get; set; }
