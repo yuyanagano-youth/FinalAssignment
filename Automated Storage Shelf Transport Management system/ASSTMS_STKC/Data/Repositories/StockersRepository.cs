@@ -15,7 +15,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 1. 保管棚状態の取得 (SELECT)
-        public List<StockInfo> GetStockerStatusesForFront()
+        public async Task<List<StockInfo>> GetStockerStatusesForFront()
         {
             string sql = @"
                 SELECT * 
@@ -29,11 +29,11 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 2. オンライン報告時の状態変更 (UPDATE)
-        public int UpdateOnlineStatus(string stockerId, string connectionStatus, string operationState)
+        public async Task<int> UpdateOnlineStatus(string stockerId, string connectionStatus)
         {
             string sql = @"
                 UPDATE Stockers 
-                SET ConnectionStatus = @ConnectionStatus, OperationState = @OperationState
+                SET ConnectionStatus = @ConnectionStatus, OperationState = 'IDLE'
                 WHERE StockerID = @StockerId";
 
             using (IDbConnection db = _context.CreateConnection())
@@ -42,13 +42,13 @@ namespace ASSTMS_STKC.Data.Repositories
                 {
                     StockerId = stockerId,
                     ConnectionStatus = connectionStatus,
-                    OperationState = operationState,
+
                 });
             }
         }
 
         // 3 動作開始、完了時の状態変更 (UPDATE)
-        public int UpdateOperationState(string stockerId, string operationState)
+        public async Task<int> UpdateOperationState(string stockerId, string operationState)
         {
             string sql = @"
                 UPDATE Stockers 
@@ -66,7 +66,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 4　一定時間通信がない保管棚をオフラインに変更 (UPDATE)
-        public int TimeoutOfflineStockers(int timeoutSeconds)
+        public async Task<int> TimeoutOfflineStockers(int timeoutSeconds)
         {
             //最終通信時刻が(現在時刻-設定時間)より前の時間のレコードを一括変更
             string sql = @"

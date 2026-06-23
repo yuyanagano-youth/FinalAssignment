@@ -16,7 +16,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 1. ログの新規登録 (INSERT)
-        public int InsertLog(DeviceLog log)
+        public async Task<int> InsertLog(DeviceLog log)
         {
             string sql = @"
                 INSERT INTO Logs (LogID, Timestamp, StockerID, Level, Message)
@@ -37,7 +37,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 2. ログの取得 (SELECT)
-        public List<DeviceLog> GetAllLogs(string stockerId)
+        public async Task<List<DeviceLog>> GetAllLogs(string stockerId)
 
         {
             string sql = @"

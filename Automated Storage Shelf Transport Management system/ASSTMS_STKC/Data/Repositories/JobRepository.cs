@@ -16,7 +16,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 1. JOBの新規登録 (INSERT)
-        public string InsertJob(JobCreateReq req)
+        public async Task<string> InsertJob(JobCreateReq req)
         {
             //実際の採番は別クラス
             string newJobId = "JOB" + DateTime.Now.ToString("yyyyMMddHHmmss");
@@ -43,7 +43,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 2. JOBの一覧取得 (SELECT)
-        public List<JobInfo> GetAllJobs(string? stockerId)
+        public async Task<List<JobInfo>> GetAllJobs(string? stockerId)
         {
             string sql = @"
                 SELECT * 
@@ -59,7 +59,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 3. 選択JOB取得 (SELECT)
-        public JobInfo? GetJobById(string jobId)
+        public async Task<JobInfo?> GetJobById(string jobId)
         {
             string sql = @"
                 SELECT * 
@@ -73,7 +73,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 4. 一番古いJOBの取得 (SELECT)
-        public JobInfo? GetOldestUnprocessedJob()
+        public async Task<JobInfo?> GetOldestUnprocessedJob()
         {
             string sql = @"
                 SELECT TOP 1 * 
@@ -87,7 +87,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 5. JOBステータスの変更 (UPDATE)
-        public int UpdateJobStatus(string jobId, string status)
+        public async Task<int> UpdateJobStatus(string jobId, string status)
         {
             string sql = @"
                 UPDATE Jobs 
@@ -105,7 +105,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 6. JOB削除 (DELETE)
-        public int DeleteOrCancelJob(string jobId)
+        public async Task<int> DeleteOrCancelJob(string jobId)
         {
             string sql = @"
                 DELETE FROM Jobs

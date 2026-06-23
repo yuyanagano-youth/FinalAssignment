@@ -15,7 +15,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 1. 保管棚状態の取得 (SELECT)
-        public List<ShelfInfo> GetAllShelves(string stockerId)
+        public async Task<List<ShelfInfo>> GetAllShelves(string stockerId)
         {
             string sql = @"
                 SELECT * 
@@ -30,7 +30,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 2. 入庫完了時の在庫更新 (UPDATE)
-        public int InsertStock(string shelfId, string carrierId)
+        public async Task<int> InsertStock(string shelfId, string carrierId)
         {
             string sql = @"
                 UPDATE Shelves 
@@ -48,7 +48,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 3. 出庫完了時の在庫更新 (UPDATE)
-        public int DeleteStockByShelfId(string shelfId)
+        public async Task<int> DeleteStockByShelfId(string shelfId)
         {
             string sql = @"
                 UPDATE Shelves 

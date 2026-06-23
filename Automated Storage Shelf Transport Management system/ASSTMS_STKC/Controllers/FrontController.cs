@@ -3,6 +3,7 @@ using ASSTMS_STKC.Services;
 using ASSTMS_STKC.SharedModels;
 using ASSTMS_STKC.SharedModels.Models;
 using Microsoft.AspNetCore.Mvc;
+
 namespace ASSTMS_STKC.Controllers
 {
     [ApiController]
@@ -24,7 +25,7 @@ namespace ASSTMS_STKC.Controllers
 
         //保管棚状態一覧取得
         [HttpGet("stockers")]
-        public IActionResult GetStockers()
+        public async Task<IActionResult> GetStockerListAsync()
         {
             //var list = new List<StockerIndexRes>
             //{
@@ -34,7 +35,7 @@ namespace ASSTMS_STKC.Controllers
 
             //return Ok(list);
 
-            List<StockInfo> stockerList = _stockersRepository.GetStockerStatusesForFront();
+            List<StockInfo> stockerList = await _stockersRepository.GetStockerStatusesForFront();
 
             // リストを、通信用の record（StockerIndexRes）のリストに詰め替え
             List<StockerIndexRes> responseList = stockerList.Select(dto => new StockerIndexRes(
@@ -52,7 +53,7 @@ namespace ASSTMS_STKC.Controllers
 
         //JOB一覧取得
         [HttpGet("jobs/active")]
-        public IActionResult GetActiveJobs([FromQuery] string? stockerId)
+        public async Task<IActionResult> GetJobListAsync([FromQuery] string? stockerId)
         {
             //var list = new List<JobIndexRes>
             //{
@@ -62,7 +63,7 @@ namespace ASSTMS_STKC.Controllers
 
             //return Ok(list);
 
-            List<JobInfo> JobList = _jobRepository.GetAllJobs(stockerId);
+            List<JobInfo> JobList = await _jobRepository.GetAllJobs(stockerId);
 
             // 通信用の record（JobIndexRes）のリストに詰め替える
             List<JobIndexRes> responseList = JobList.Select(dto => new JobIndexRes(
@@ -80,18 +81,18 @@ namespace ASSTMS_STKC.Controllers
 
         //JOB削除
         [HttpDelete("jobs/{jobId}")]
-        public IActionResult DeleteJob([FromRoute] string jobId)
+        public async Task<IActionResult> CancelJobAsync([FromRoute] string jobId)
         {
 
             Console.WriteLine($"[フロント通信受信] JOB削除要求: {jobId}");
 
-            //bool success = _jobRepository.DeleteOrCancelJob(jobId);
+            //bool success = await _jobRepository.DeleteOrCancelJob(jobId);
 
             return Ok();
         }
 
         [HttpGet("inventory/shelves")]
-        public IActionResult GetShelves([FromQuery] string? stockerId)
+        public async Task<IActionResult> GetShelfListAsync([FromQuery] string? stockerId)
         {
             //var list = new List<ShelfStockIndexRes>
             //{
@@ -110,7 +111,7 @@ namespace ASSTMS_STKC.Controllers
             else
             {
                 // stockerId が指定された場合（フィルター検索）
-                ShelfList = _shelfRepository.GetAllShelves(stockerId);
+                ShelfList = await _shelfRepository.GetAllShelves(stockerId);
             }
 
             // 通信用の record（JobIndexRes）のリストに詰め替える
@@ -126,7 +127,7 @@ namespace ASSTMS_STKC.Controllers
 
         //ログ取得
         [HttpGet("logs/recent")]
-        public IActionResult GetLogs([FromQuery] string? stockerId)
+        public async Task<IActionResult> GetLogListAsync([FromQuery] string? stockerId)
         {
             //var list = new List<ShelfStockIndexRes>
             //{
@@ -145,7 +146,7 @@ namespace ASSTMS_STKC.Controllers
             else
             {
                 // stockerId が指定された場合（フィルター検索）
-                LogList = _logRepository.GetAllLogs(stockerId);
+                LogList = await _logRepository.GetAllLogs(stockerId);
             }
 
             // 通信用の record（LogIndexRes）のリストに詰め替える
@@ -161,7 +162,7 @@ namespace ASSTMS_STKC.Controllers
 
         //JOB生成、停止指令
         [HttpPost("equipment/command")]
-        public IActionResult CreateJob([FromBody] JobCreateReq req)
+        public async Task<IActionResult> CreateJobAsync([FromBody] JobCreateReq req)
         {
             Console.WriteLine($"[フロント通信受信] 搬送ジョブ送信要求を受け取りました");
 
@@ -175,7 +176,7 @@ namespace ASSTMS_STKC.Controllers
             {
                 //実際は別クラスでバリテーションチェック
                 //JobService.ReceiveJobFromFront(req);
-                string newJobId = _jobRepository.InsertJob(req);
+                string newJobId = await _jobRepository.InsertJob(req);
 
                 Console.WriteLine($"JOBを生成しました。ID: {newJobId}, 搬送元: {req.Source} -> 搬送先: {req.Destination}");
 
@@ -204,7 +205,7 @@ namespace ASSTMS_STKC.Controllers
             else if (req.Command == "STOP")
             {
                 //実際は別クラスでバリテーションチェック
-                //bool success = StubCommandService.SendStopCommandAsync();
+                //bool success = await StubCommandService.SendStopCommandAsync();
                 bool success = true;
 
                 if (success == true)
