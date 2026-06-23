@@ -1,7 +1,14 @@
+using ASSTMS_STKC.Data.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
+builder.Services.AddScoped<StockersRepository>();
+builder.Services.AddScoped<ShelfRepository>();
+builder.Services.AddScoped<LogRepository>();
+builder.Services.AddScoped<JobRepository>();
 
 var app = builder.Build();
 
@@ -19,6 +26,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
