@@ -62,18 +62,7 @@ namespace ASSTMS_STKC.Controllers
 
             //return Ok(list);
 
-            List<JobInfo> JobList;
-
-            if (string.IsNullOrEmpty(stockerId))
-            {
-                // 省略された場合（全件取得）
-                JobList = _jobRepository.GetAllActiveJobs();
-            }
-            else
-            {
-                // stockerId が指定された場合（フィルター検索）
-                JobList = _jobRepository.GetActiveJobsByStockerId(stockerId);
-            }
+            List<JobInfo> JobList = _jobRepository.GetAllJobs(stockerId);
 
             // 通信用の record（JobIndexRes）のリストに詰め替える
             List<JobIndexRes> responseList = JobList.Select(dto => new JobIndexRes(
