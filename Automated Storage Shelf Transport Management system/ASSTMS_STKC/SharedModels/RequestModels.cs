@@ -6,7 +6,8 @@ namespace ASSTMS_STKC.SharedModels
     //フロントエンド用
 
     //ストッカー一覧取得(レスポンス)
-    public record StockerIndexRes(string StockerId, string StockerName, string Status, string ConnectionStatus, string OperationState);
+    public record Alarms(string ErrorCode, string message);
+    public record StockerIndexRes(string StockerId, string StockerName, string Status, string ConnectionStatus, string OperationState, Alarms Alarms);
     //JOB生成 or STOP(リクエスト)
     public record JobCreateReq(string Command, string? StockerId, string? CarrierId, string? Source, string? Destination);
     //JOB生成成功(レスポンス)
