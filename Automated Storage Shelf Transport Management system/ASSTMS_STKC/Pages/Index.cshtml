@@ -1,10 +1,82 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Main Console";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- ============================================================
+     SCR-001: メイン操作画面 (Dispatch Console)
+     対応機能: F-002(搬送指示), F-003(異常判定), F-007(安全インターロック)
+============================================================= -->
+
+<div class="amhs-card">
+    <label class="form-label-sm">対象ストッカー（Active のみ表示・R-002）</label>
+    <select id="stockerSelect" class="form-select mb-2"></select>
+
+    <div class="d-flex gap-2 align-items-center mb-1">
+        <span class="form-label-sm mb-0">接続状態:</span>
+        <span id="connBadge" class="badge badge-unknown">---</span>
+        <span class="form-label-sm mb-0 ms-2">稼働状態:</span>
+        <span id="opBadge" class="badge badge-unknown">---</span>
+    </div>
 </div>
+
+<!-- 異常発生アラートエリア（F-003） -->
+<div id="alertArea"></div>
+
+<div class="amhs-card">
+    <h6 class="mb-3">搬送指示 (TRANSFER)</h6>
+
+    <label class="form-label-sm">キャリアID</label>
+    <input id="carrierIdInput" type="text" class="form-control mb-3" placeholder="例: CST-1001" />
+
+    <label class="form-label-sm">搬送元</label>
+    <select id="sourceSelect" class="form-select mb-3">
+        <option value="IN_PORT">IN_PORT</option>
+        <option value="SHELF_A1">SHELF_A1</option>
+        <option value="SHELF_A2">SHELF_A2</option>
+        <option value="SHELF_A3">SHELF_A3</option>
+    </select>
+
+    <label class="form-label-sm">搬送先</label>
+    <select id="destSelect" class="form-select mb-3">
+        <option value="SHELF_A1">SHELF_A1</option>
+        <option value="SHELF_A2">SHELF_A2</option>
+        <option value="SHELF_A3">SHELF_A3</option>
+        <option value="OUT_PORT">OUT_PORT</option>
+    </select>
+
+    <button id="btnDispatch" class="btn btn-primary btn-block-mobile mb-2">
+        <i class="bi bi-send-fill"></i> 搬送指示実行
+    </button>
+
+    <!-- 即時割り込みの緊急停止ボタン（F-007） -->
+    <button id="btnEStop" class="btn btn-danger btn-block-mobile">
+        <i class="bi bi-exclamation-octagon-fill"></i> E-STOP（緊急停止）
+    </button>
+</div>
+
+<!-- ============================================================
+     【ポーリング通信テストパネル】
+     real backend が未接続の段階でも、2000ms間隔の状態監視ループと
+     コンソール側ハートビート(3秒間隔)の挙動を仮想JSONサーバーに対して
+     確認できるようにするデバッグ用パネル。
+     本番リリース時は非表示にしてよい（display:none切替等）。
+============================================================= -->
+<div class="amhs-card">
+    <h6 class="mb-2">
+        <i class="bi bi-bug-fill"></i> ポーリング通信テスト（開発用）
+    </h6>
+    <p class="form-label-sm">
+        USE_MOCK_API = true の間、仮想JSONサーバーに対する定期ポーリングと
+        コンソール疑似ハートビートの送受信ログをここに表示します。
+    </p>
+    <button id="btnSimulateHeartbeat" class="btn btn-outline-secondary btn-sm mb-2">
+        <i class="bi bi-broadcast"></i> コンソール側ハートビートを1回疑似送信
+    </button>
+    <div id="pollLogPanel" class="poll-log-panel"></div>
+</div>
+
+@section Scripts {
+    <script src="~/js/page-index.js"></script>
+}

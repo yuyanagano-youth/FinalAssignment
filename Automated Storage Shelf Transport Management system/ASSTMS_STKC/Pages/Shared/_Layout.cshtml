@@ -2,57 +2,111 @@
 <html lang="ja">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>AMHS Control Panel</title>
-    <script src="@("https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4")"> </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col pb-20 selection:bg-indigo-500 selection:text-white">
+    <!--
+        スマートフォン(Android 16:9想定)専用のビューポート設定。
+        ネイティブアプリ風の操作感を出すため、ピンチズーム・二重タップズームは無効化する。
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0d1b2a" />
+    <title>@ViewData["Title"] - 自動保管棚管理システム</title>
 
-    <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-50 shadow-md px-4 py-3">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid mt-0.5 fa-microchip text-indigo-400 text-xl animate-pulse"></i>
-                <h1 class="text-md font-bold tracking-wider text-slate-200">STKC SIMULATOR</h1>
-            </div>
-            <div id="connectionMasterBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
-                SYSTEM ACTIVE
-            </div>
-        </div>
+    <!-- ===== PWA設定: マニフェスト & アイコン ===== -->
+    <link rel="manifest" href="~/manifest.json" />
+    <link rel="apple-touch-icon" href="~/icons/icon-192.png" />
+    <link rel="icon" type="image/png" href="~/icons/icon-192.png" />
+
+    <!-- Bootstrap 5 (CDN) : カードUI・グリッド・ユーティリティクラス用 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons (CDN) : ボトムナビ用アイコン -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+    <!-- 自前のApp Shell用スタイル -->
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+
+    <!-- ============================================================
+         App Shell ヘッダー（共通ステータスブロック）
+         必要に応じて各ページ側のJSがここにバナー通知などを追加する。
+    ============================================================= -->
+    <header class="app-header">
+        <span class="app-header-title">自動保管棚管理システム</span>
+        <span id="globalConnIndicator" class="conn-indicator" title="フロントエンド⇔サーバー間の通信状態">
+            <i class="bi bi-circle-fill"></i>
+        </span>
     </header>
 
-    <div id="toastAlert" class="fixed top-16 left-1/2 -translate-x-1/2 w-full max-w-sm px-4 z-50 pointer-events-none transition-all duration-300 transform scale-95 opacity-0 hidden">
-        <div id="toastContent" class="bg-slate-950 border text-sm shadow-2xl rounded-xl p-3.5 flex items-start gap-3 text-slate-200"></div>
-    </div>
-
-    <main role="main" class="flex-1 w-full max-w-md mx-auto px-4 py-4 overflow-x-hidden">
+    <!-- ============================================================
+         メインコンテンツ（各 Pages/*.cshtml が描画される領域）
+         ヘッダー高さ＋ボトムナビ高さ分のpaddingはsite.cssで調整。
+    ============================================================= -->
+    <main class="app-main">
         @RenderBody()
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800 shadow-2xl z-50">
-        <div class="max-w-md mx-auto grid grid-cols-5 h-16 items-center text-center">
-            <a href="/" class="nav-link flex flex-col items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors gap-1">
-                <i class="fa-solid fa-gamepad text-lg"></i><span class="text-[10px] font-medium">メイン操作</span>
-            </a>
-            <a href="/Stockers" class="nav-link flex flex-col items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors gap-1">
-                <i class="fa-solid fa-layer-group text-lg"></i><span class="text-[10px] font-medium">装置一覧</span>
-            </a>
-            <a href="/Shelves" class="nav-link flex flex-col items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors gap-1">
-                <i class="fa-solid fa-table-cells text-lg"></i><span class="text-[10px] font-medium">棚・在庫</span>
-            </a>
-            <a href="/Jobs" class="nav-link flex flex-col items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors gap-1">
-                <i class="fa-solid fa-clock-rotate-left text-lg"></i><span class="text-[10px] font-medium">ジョブ監視</span>
-            </a>
-            <a href="/History" class="nav-link flex flex-col items-center justify-center text-slate-400 hover:text-indigo-400 transition-colors gap-1">
-                <i class="fa-solid fa-list-ul text-lg"></i><span class="text-[10px] font-medium">履歴ログ</span>
-            </a>
-        </div>
+    <!-- ============================================================
+         固定ボトムナビゲーションバー（App Shell / 5タブ構成）
+         現在のページに active クラスを付与してハイライトする。
+    ============================================================= -->
+    <nav class="bottom-nav">
+        <a class="nav-item @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")" href="/Index">
+            <i class="bi bi-speedometer2"></i>
+            <span>Main</span>
+        </a>
+        <a class="nav-item @(ViewContext.RouteData.Values["page"]?.ToString() == "/Stockers" ? "active" : "")" href="/Stockers">
+            <i class="bi bi-hdd-stack"></i>
+            <span>Stockers</span>
+        </a>
+        <a class="nav-item @(ViewContext.RouteData.Values["page"]?.ToString() == "/Jobs" ? "active" : "")" href="/Jobs">
+            <i class="bi bi-list-task"></i>
+            <span>Jobs</span>
+        </a>
+        <a class="nav-item @(ViewContext.RouteData.Values["page"]?.ToString() == "/Shelves" ? "active" : "")" href="/Shelves">
+            <i class="bi bi-grid-3x3-gap"></i>
+            <span>Shelves</span>
+        </a>
+        <a class="nav-item @(ViewContext.RouteData.Values["page"]?.ToString() == "/History" ? "active" : "")" href="/History">
+            <i class="bi bi-clock-history"></i>
+            <span>History</span>
+        </a>
     </nav>
 
-    <script src="~/js/stkc-core.js" asp-append-version="true"></script>
-    <script src="~/js/app.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <!-- ============================================================
+         トースト通知エリア（共通：ジョブ送信成功時など）
+    ============================================================= -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080; margin-bottom: 70px;">
+        <div id="globalToast" class="toast align-items-center text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="globalToastBody">処理が完了しました</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (トースト等のコンポーネント制御に使用) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!--
+        ===== 決定ファイル: amhs-core.js =====
+        全ページ共通の通信モジュール。バックエンドAPI呼び出しと
+        モック(virtual JSON server)切り替えロジックをここに集約する。
+        mock-server.js → amhs-core.js の順で読み込むこと（依存関係）。
+    -->
+    <script src="~/js/mock-server.js"></script>
+    <script src="~/js/amhs-core.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        // ===== PWA: Service Worker 登録 =====
+        // オフライン時でもApp Shell自体は表示できるようにキャッシュ制御する。
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+        .catch(err => console.error('[PWA] Service Worker registration failed:', err));
+        });
+        }
+    </script>
 </body>
 </html>

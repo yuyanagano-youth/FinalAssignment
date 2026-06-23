@@ -1,4 +1,31 @@
 ﻿@page
 @model ASSTMS_STKC.Pages.ShelvesModel
 @{
+    ViewData["Title"] = "Shelves";
+}
+
+<!-- ============================================================
+     SCR-003: 棚・在庫 (Inventory Grid)
+     対応機能: F-005
+     R-002/F-005: ドロップダウンは status === "Active" のストッカーのみ表示
+     色分け: 空き=灰色 / 占有中=黄色 / Alarm=赤
+     R-003: 各マスをタップすると色（状態）を変更できる（デモ用ローカル切替）
+============================================================= -->
+
+<div class="amhs-card">
+    <label class="form-label-sm">対象ストッカー（Active のみ表示）</label>
+    <select id="shelfStockerSelect" class="form-select"></select>
+</div>
+
+<div class="amhs-card">
+    <div class="d-flex gap-3 mb-3 small">
+        <span><span class="d-inline-block" style="width:12px;height:12px;background:var(--shelf-empty);border-radius:3px;"></span> 空き</span>
+        <span><span class="d-inline-block" style="width:12px;height:12px;background:var(--shelf-occupied);border-radius:3px;"></span> 占有中</span>
+        <span><span class="d-inline-block" style="width:12px;height:12px;background:var(--shelf-alarm);border-radius:3px;"></span> Alarm</span>
+    </div>
+    <div id="shelfGrid" class="shelf-grid"></div>
+</div>
+
+@section Scripts {
+    <script src="~/js/page-shelves.js"></script>
 }
