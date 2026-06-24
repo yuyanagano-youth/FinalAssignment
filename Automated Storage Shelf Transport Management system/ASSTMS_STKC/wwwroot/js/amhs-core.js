@@ -17,7 +17,7 @@
 // false : 実際の ASP.NET Core API (同一オリジン / localhost) を呼び出す。
 //         結合テスト・本番リリース時にこの値を false へ切り替えるだけでよい。
 // ============================================================================
-const USE_MOCK_API = false;
+const USE_MOCK_API = true;
 
 // 実APIのベースURL。リバースプロキシ等で配信パスが変わる場合のみ変更する。
 const API_BASE = "";
@@ -72,49 +72,66 @@ const AmhsCore = (() => {
     // PageごとのJS（page-*.js）はこれらの関数のみを呼び出すこと。
     // ------------------------------------------------------------------------
 
-    /** GET  /api/front/stockers - 接続・稼働状態を含む全ストッカー取得 (F-001, F-009) */
+    /** GET /api/front/stockers - 接続・稼働状態を含む全ストッカー取得 (F-001, F-005, F-009) */
     async function getStockers() {
         return request("GET", "/api/front/stockers");
     }
 
-    /** GET /api/jobs/active?stockerId=... - アクティブジョブ一覧取得 (F-004) */
+    /** GET /api/front/jobs/active?stockerId=... - アクティブジョブ一覧取得 (F-004) */
     async function getActiveJobs(stockerId) {
         const qs = stockerId ? `?stockerId=${encodeURIComponent(stockerId)}` : "";
-        return request("GET", `/api/jobs/active${qs}`);
+        return request("GET", `/api/front/jobs/active${qs}`);
     }
 
-    /** DELETE /api/jobs/{jobId} - ジョブ削除 (F-004) */
+    /** DELETE /api/front/jobs/{jobId} - ジョブ削除 (F-004) */
     async function deleteJob(jobId) {
-        return request("DELETE", `/api/jobs/${encodeURIComponent(jobId)}`);
+        return request("DELETE", `/api/front/jobs/${encodeURIComponent(jobId)}`);
     }
 
-    /** GET /api/inventory/shelves?stockerId=... - 棚・在庫配置取得 (F-005) */
+    /** GET /api/front/inventory/shelves?stockerId=... - 棚・在庫配置取得 (F-005) */
     async function getInventoryShelves(stockerId) {
-        return request("GET", `/api/inventory/shelves?stockerId=${encodeURIComponent(stockerId)}`);
+        return request("GET", `/api/front/inventory/shelves?stockerId=${encodeURIComponent(stockerId)}`);
     }
 
-    /** GET /api/logs/recent?stockerId=... - 履歴ログ取得（最新10件）(F-006) */
+    /** GET /api/front/logs/recent?stockerId=... - 履歴ログ取得（最新10件）(F-006) */
     async function getRecentLogs(stockerId) {
         const qs = stockerId ? `?stockerId=${encodeURIComponent(stockerId)}` : "";
-        return request("GET", `/api/logs/recent${qs}`);
+        return request("GET", `/api/front/logs/recent${qs}`);
     }
 
     /**
-     * POST /api/equipment/command - 搬送指示／緊急停止 (F-002, F-003, F-007)
-     * @param {{command:string, stockerId:string, carrierId?:string, source?:string, destination?:string}} payload
+     * POST /api/front/equipment/command - 搬送指示／停止 (F-002, F-003, F-007)
+     * @param {{command:string, stockerId:string|null, carrierId?:string|null, source?:string|null, destination?:string|null}} payload
+     *
+     * 【仕様書 2.1-②より】
+     * command="TRANSFER" の場合: stockerId/carrierId/source/destination をすべて指定する。
+     * command="STOP" の場合: 仕様書のサンプルでは stockerId/carrierId/source/destination が
+     *   すべて null になっている → これはストッカー個別ではなく、システム全体への停止指示と読める。
+     *   ※ 実際にUI側でどのストッカーのSTOPボタンを押しても全停止にすべきか、
+     *      それとも対象ストッカーIDを送ってよいかは、バックエンド担当者と要確認。
+     *      現時点ではUIの選択中ストッカーIDをそのまま送るが、
+     *      バックエンド側がstockerIdを無視する実装であれば問題は起きない。
      */
     async function postEquipmentCommand(payload) {
-        return request("POST", "/api/equipment/command", payload);
+        return request("POST", "/api/front/equipment/command", payload);
     }
 
     /**
-     * POST /api/equipment/heartbeat - コンソールアプリ側の死活監視・ポーリング (E-002, E-003, E-004)
-     * 本来はC#コンソールアプリが3秒ごとに送信するものだが、結合テスト前の
-     * 「ポーリング通信テスト」用にブラウザ側からも疑似呼び出しできるよう公開している。
+     * 【注意】このAPIはフロントエンドの仕様書（2.1節）には存在しない。
+     * 仕様書 2.2節に記載の /api/stub/equipment/polling は
+     * 「コンソールアプリ（C#）⇄ サーバー」専用のエンドポイントであり、
+     * 本来Webフロントエンドからは呼び出さない（担当範囲外）。
+     *
+     * ここに残しているのは、コンソールアプリが未実装の段階で、
+     * バックエンドの /api/stub/equipment/polling が正しく応答するかを
+     * 手動で動作確認するための「デバッグ専用ツール」として。
+     * 本番のUIフローでは使用しないこと。
+     *
+     * POST /api/stub/equipment/polling
      * @param {{stockerId:string, currentOperationState:string}} payload
      */
-    async function postHeartbeat(payload) {
-        return request("POST", "/api/equipment/heartbeat", payload);
+    async function postConsolePollingDebug(payload) {
+        return request("POST", "/api/stub/equipment/polling", payload);
     }
 
     // ------------------------------------------------------------------------
@@ -127,7 +144,7 @@ const AmhsCore = (() => {
         Job: { PENDING: "PENDING", RUNNING: "RUNNING", COMPLETED: "COMPLETED", ABORTED: "ABORTED" },
         Stocker: { ACTIVE: "Active", RESERVED: "Reserved" },
         LogLevel: { INFO: "INFO", WARN: "WARN", ALARM: "ALARM" },
-        Command: { TRANSFER: "TRANSFER", ESTOP: "ESTOP" }
+        Command: { TRANSFER: "TRANSFER", STOP: "STOP" }
     };
 
     // ------------------------------------------------------------------------
@@ -174,7 +191,7 @@ const AmhsCore = (() => {
         getInventoryShelves,
         getRecentLogs,
         postEquipmentCommand,
-        postHeartbeat,
+        postConsolePollingDebug,
         Status,
         isDispatchDisabled,
         filterActiveStockers,

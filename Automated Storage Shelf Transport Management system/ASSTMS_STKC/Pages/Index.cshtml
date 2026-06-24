@@ -50,29 +50,33 @@
         <i class="bi bi-send-fill"></i> 搬送指示実行
     </button>
 
-    <!-- 即時割り込みの緊急停止ボタン（F-007） -->
+    <!-- 停止指示ボタン（仕様書2.1-② command="STOP"）-->
+    <!-- 【要確認】仕様書のサンプルでは全フィールドnull＝システム全体停止の可能性。
+         バックエンド担当者と対象スコープを確認すること。 -->
     <button id="btnEStop" class="btn btn-danger btn-block-mobile">
-        <i class="bi bi-exclamation-octagon-fill"></i> E-STOP（緊急停止）
+        <i class="bi bi-exclamation-octagon-fill"></i> STOP（停止指示）
     </button>
 </div>
 
 <!-- ============================================================
-     【ポーリング通信テストパネル】
-     real backend が未接続の段階でも、2000ms間隔の状態監視ループと
-     コンソール側ハートビート(3秒間隔)の挙動を仮想JSONサーバーに対して
-     確認できるようにするデバッグ用パネル。
-     本番リリース時は非表示にしてよい（display:none切替等）。
+     【バックエンド通信テストパネル】
+     Main画面の3秒ポーリング(GET /api/front/stockers)の動作確認用ログ。
+     加えて、コンソールアプリ(C#)担当が実装する POST /api/stub/equipment/polling を
+     コンソールアプリが完成する前にバックエンド単体で検証するための
+     デバッグボタンも用意している（本来はフロントの担当範囲外のAPI）。
+     本番リリース時はこのパネル自体を非表示にしてよい。
 ============================================================= -->
 <div class="amhs-card">
     <h6 class="mb-2">
-        <i class="bi bi-bug-fill"></i> ポーリング通信テスト（開発用）
+        <i class="bi bi-bug-fill"></i> 通信テスト（開発用）
     </h6>
     <p class="form-label-sm">
-        USE_MOCK_API = true の間、仮想JSONサーバーに対する定期ポーリングと
-        コンソール疑似ハートビートの送受信ログをここに表示します。
+        GET /api/front/stockers への3秒ごとの自動ポーリング結果をここに表示します。<br />
+        下のボタンは、コンソールアプリ用エンドポイント (POST /api/stub/equipment/polling)
+        への疑似アクセスです（本番ではC#コンソールアプリが自動送信するためフロントからは不要）。
     </p>
     <button id="btnSimulateHeartbeat" class="btn btn-outline-secondary btn-sm mb-2">
-        <i class="bi bi-broadcast"></i> コンソール側ハートビートを1回疑似送信
+        <i class="bi bi-broadcast"></i> [デバッグ] コンソール用Pollingに1回疑似アクセス
     </button>
     <div id="pollLogPanel" class="poll-log-panel"></div>
 </div>
