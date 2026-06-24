@@ -16,13 +16,14 @@ namespace stocker.Client
             //_httpClient.Timeout = TimeSpan.FromSeconds(30);
 
             // サーバーURL
-            _httpClient.BaseAddress = new Uri("http://172.16.7.6:5028");
+            _httpClient.BaseAddress = new Uri("http://172.16.7.6:5028/");
         }
 
         public async Task<HttpResponseMessage> PostAsync<T>(string url, T request)
         {
             string json = JsonSerializer.Serialize(request);
 
+            // エラーの確認用
             Console.WriteLine($"Request URL : {url}");
             Console.WriteLine($"Request JSON: {json}");
 
@@ -40,6 +41,7 @@ namespace stocker.Client
         {
             var json = JsonSerializer.Serialize(request);
 
+            // エラーの確認用
             Console.WriteLine($"Request URL : {url}");
             Console.WriteLine($"Request JSON: {json}");
 
@@ -49,6 +51,7 @@ namespace stocker.Client
 
             var responseBody = await response.Content.ReadAsStringAsync();
 
+            // エラーの確認用
             Console.WriteLine($"StatusCode : {(int)response.StatusCode}");
             Console.WriteLine($"Response   : {responseBody}");
 

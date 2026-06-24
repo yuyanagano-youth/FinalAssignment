@@ -36,6 +36,8 @@ public class Program
                 pollingService,
                 jobService);
 
+            var commandListener = new CommandListener(commandDispatcher);
+
             // 初期設定
             onlineManager.Initialize();
 
@@ -50,14 +52,24 @@ public class Program
                 switch (input)
                 {
                     case "1":
+
                         await onlineManager.GoOnlineAsync("STK001");
+
+                        await commandListener.StartListener();
+
                         break;
 
                     case "2":
+
+                        commandListener.StopListener();
+
                         await onlineManager.GoOfflineAsync();
+
                         break;
 
                     case "0":
+                        commandListener.StopListener();
+
                         await onlineManager.GoOfflineAsync();
                         Console.WriteLine("アプリ終了");
                         return;
