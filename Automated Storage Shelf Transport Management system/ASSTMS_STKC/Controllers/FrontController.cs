@@ -15,8 +15,15 @@ namespace ASSTMS_STKC.Controllers
         private readonly ShelfRepository _shelfRepository;
         private readonly LogRepository _logRepository;
         private readonly JobRepository _jobRepository;
+        private readonly JobValidator _jobValidator;
 
-        public FrontController(StockersRepository stockersRepository, ShelfRepository shelfRepository, LogRepository logRepository, JobRepository jobRepository)
+        public FrontController(
+            StockersRepository stockersRepository,
+            ShelfRepository shelfRepository,
+            LogRepository logRepository,
+            JobRepository jobRepository,
+            JobValidator jobValidator
+            )
         {
             _stockersRepository = stockersRepository;
             _shelfRepository = shelfRepository;
@@ -69,12 +76,12 @@ namespace ASSTMS_STKC.Controllers
 
             // 通信用の record（JobIndexRes）のリストに詰め替える
             List<JobIndexRes> responseList = JobList.Select(dto => new JobIndexRes(
-                dto.JobId,
-                dto.StockerId,
-                dto.CarrierId,
-                dto.SourceLocation,
-                dto.DestLocation,
-                dto.JobStatus
+                dto.JobId ?? string.Empty,
+                dto.StockerId ?? string.Empty,
+                dto.CarrierId ?? string.Empty,
+                dto.SourceLocation ?? string.Empty,
+                dto.DestLocation ?? string.Empty,
+                dto.JobStatus ?? string.Empty
             )).ToList();
 
             // 200 OK で返却
@@ -118,7 +125,7 @@ namespace ASSTMS_STKC.Controllers
 
             // 通信用の record（JobIndexRes）のリストに詰め替える
             List<ShelfStockIndexRes> responseList = ShelfList.Select(dto => new ShelfStockIndexRes(
-                dto.ShelfName,
+                dto.ShelfName ?? string.Empty,
                 dto.CarrierId,
                 dto.InTime
             )).ToList();
@@ -155,7 +162,7 @@ namespace ASSTMS_STKC.Controllers
             List<LogIndexRes> responseList = LogList.Select(dto => new LogIndexRes(
                 dto.Timestamp,
                 dto.Level,
-                dto.Message
+                dto.Message ?? string.Empty
             )).ToList();
 
             // 200 OK で返却

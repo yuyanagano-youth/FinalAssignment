@@ -11,6 +11,7 @@ builder.Services.AddScoped<ShelfRepository>();
 builder.Services.AddScoped<LogRepository>();
 builder.Services.AddScoped<JobRepository>();
 builder.Services.AddScoped<SqlDatabaseContext>();
+builder.Services.AddScoped<ASSTMS_STKC.Services.JobValidator>();
 
 builder.Services.AddHttpClient();
 

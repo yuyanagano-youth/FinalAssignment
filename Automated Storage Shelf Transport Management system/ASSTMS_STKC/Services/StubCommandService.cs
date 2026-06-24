@@ -27,9 +27,7 @@ namespace ASSTMS_STKC.Services
                     );
 
             HttpResponseMessage response =
-                await _httpClient.PostAsJsonAsync(
-                    $"http://localhost:5001/equipment/stop",
-                    request);
+                await _httpClient.PostAsJsonAsync($"http://172.16.7.19:5028",request);
 
             return response.IsSuccessStatusCode;
         }
