@@ -102,7 +102,7 @@
         const res = await AmhsCore.getStockers();
 
         if (!res.ok) {
-            logPoll(`GET /api/stockers 失敗 (status=${res.status})`, true);
+            logPoll(`GET /api/front/stockers 失敗 (status=${res.status})`, true);
             return;
         }
 
@@ -119,7 +119,7 @@
         const current = allStockersCache.find(s => s.stockerId === selectedId);
         applyInterlock(current);
 
-        logPoll(`GET /api/stockers OK (${allStockersCache.length}件) 選択中:${selectedId || "-"} conn=${current?.connectionStatus} op=${current?.operationState}`);
+        logPoll(`GET /api/front/stockers OK (${allStockersCache.length}件) 選択中:${selectedId || "-"} conn=${current?.connectionStatus} op=${current?.operationState}`);
     }
 
     function startPollingLoop() {

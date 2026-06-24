@@ -30,7 +30,7 @@ const AmhsCore = (() => {
      * false の場合のみ実際の HTTP リクエストを発行する。
      *
      * @param {string} method  HTTPメソッド ("GET","POST","DELETE"等)
-     * @param {string} path    APIパス (例: "/api/stockers")
+     * @param {string} path    APIパス (例: "/api/front/stockers")
      * @param {object} [body]  POST時のリクエストボディ
      */
     async function request(method, path, body) {
@@ -72,9 +72,9 @@ const AmhsCore = (() => {
     // PageごとのJS（page-*.js）はこれらの関数のみを呼び出すこと。
     // ------------------------------------------------------------------------
 
-    /** GET /api/stockers - 接続・稼働状態を含む全ストッカー取得 (F-001, F-009) */
+    /** GET  /api/front/stockers - 接続・稼働状態を含む全ストッカー取得 (F-001, F-009) */
     async function getStockers() {
-        return request("GET", "/api/stockers");
+        return request("GET", "/api/front/stockers");
     }
 
     /** GET /api/jobs/active?stockerId=... - アクティブジョブ一覧取得 (F-004) */
