@@ -166,7 +166,7 @@ namespace ASSTMS_STKC.Controllers
         {
             Console.WriteLine($"[フロント通信受信] 搬送ジョブ送信要求を受け取りました");
 
-            if (req == null || string.IsNullOrEmpty(req.Command))
+            if (req == null || string.IsNullOrEmpty(req.Command) || string.IsNullOrEmpty(req.StockerId))
             {
                 return BadRequest(new { Message = "必要なデータが不足しています。" });
             }
@@ -205,7 +205,7 @@ namespace ASSTMS_STKC.Controllers
             else if (req.Command == "STOP")
             {
                 //実際は別クラスでバリテーションチェック
-                //bool success = await StubCommandService.SendStopCommandAsync();
+                //bool success = await StubCommandService.SendStopCommandAsync(req.StockerId);
                 bool success = true;
 
                 if (success == true)

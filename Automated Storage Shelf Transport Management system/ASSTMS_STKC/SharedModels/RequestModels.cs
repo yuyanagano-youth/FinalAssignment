@@ -46,7 +46,7 @@ namespace ASSTMS_STKC.SharedModels
     public record OperationInstructionsFailureRes(string StockerId, string JobId, string JobStatus);
 
     //停止完了(レスポンス)
-    public record StopCompletedRes(string StockerId, string JobId, string JobStatus);
+    public record StopCompletedRes(string StockerId, string JobId, string JobStatus, string CurrentOperationState);
     //既に停止中(レスポンス)
     public record AlreadyStoppedRes(string StockerId);
 
