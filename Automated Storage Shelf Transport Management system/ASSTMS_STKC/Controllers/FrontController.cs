@@ -3,6 +3,7 @@ using ASSTMS_STKC.Services;
 using ASSTMS_STKC.SharedModels;
 using ASSTMS_STKC.SharedModels.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace ASSTMS_STKC.Controllers
 {
@@ -44,7 +45,7 @@ namespace ASSTMS_STKC.Controllers
                 dto.Status,
                 dto.ConnectionStatus,
                 dto.OperationState,
-                dto.alarms
+                JsonSerializer.Deserialize<List<Alarms>>(dto.alarms)
             )).ToList();
 
             // 200 OK と一緒に詰め替えたリストをJSONとして返却

@@ -8,6 +8,6 @@
         public string ConnectionStatus { get; set; }
         public string OperationState { get; set; }
         public DateTime LastHeartbeat { get; set; }
-        public Alarms alarms { get; set; }
+        public string alarms { get; set; }
     }
 }
