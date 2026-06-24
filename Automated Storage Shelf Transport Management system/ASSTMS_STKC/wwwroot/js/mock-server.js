@@ -107,11 +107,10 @@ const MockServer = (() => {
         ]
     };
 
-
     /**
-     * sessionStorageから前回の状態を復元する。
-     * 保存データが無い（＝このタブで初回アクセス）場合はseedDbをそのまま使う。
-     */
+        * sessionStorageから前回の状態を復元する。
+        * 保存データが無い（＝このタブで初回アクセス）場合はseedDbをそのまま使う。
+        */
     function loadDb() {
         try {
             const raw = sessionStorage.getItem(STORAGE_KEY);
