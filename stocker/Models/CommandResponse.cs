@@ -11,5 +11,7 @@ namespace stocker.Models
         public string? JobId { get; set; }
 
         public string? JobStatus { get; set; }
+
+        public string? CurrentOperationState { get; set; }
     }
 }
