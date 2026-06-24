@@ -69,7 +69,8 @@ namespace ASSTMS_STKC.Services
                     return (false, Message);
                 }
 
-                return (false, string.Empty);
+
+                return (true, string.Empty);
             }
 
             // =================================================
@@ -93,13 +94,13 @@ namespace ASSTMS_STKC.Services
                     return (false, Message);
                 }
 
-                return (false, string.Empty);
+                return (true, string.Empty);
             }
 
             else
             {
                 Message = "棚から棚への搬送はできません";
-                return (true, Message);
+                return (false, Message);
             }
             
 

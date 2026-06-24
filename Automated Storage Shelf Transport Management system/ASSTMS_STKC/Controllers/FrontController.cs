@@ -15,13 +15,21 @@ namespace ASSTMS_STKC.Controllers
         private readonly ShelfRepository _shelfRepository;
         private readonly LogRepository _logRepository;
         private readonly JobRepository _jobRepository;
+        private readonly JobValidator _jobValidator;
 
-        public FrontController(StockersRepository stockersRepository,ShelfRepository shelfRepository,LogRepository logRepository,JobRepository jobRepository)
+        public FrontController(
+            StockersRepository stockersRepository,
+            ShelfRepository shelfRepository,
+            LogRepository logRepository,
+            JobRepository jobRepository,
+            JobValidator jobValidator,
+            JobAppraiser jobAppraiser)
         {
             _stockersRepository = stockersRepository;
             _shelfRepository = shelfRepository;
             _logRepository = logRepository;
             _jobRepository = jobRepository;
+            _jobValidator = jobValidator;
         }
 
         //保管棚状態一覧取得
@@ -87,7 +95,7 @@ namespace ASSTMS_STKC.Controllers
 
             Console.WriteLine($"[フロント通信受信] JOB削除要求: {jobId}");
 
-            //bool success = await _jobRepository.DeleteOrCancelJob(jobId);
+            int success = await _jobRepository.DeleteOrCancelJob(jobId);
 
             return Ok();
         }
@@ -175,9 +183,16 @@ namespace ASSTMS_STKC.Controllers
 
             if (req.Command == "TRANSFER")
             {
-                //実際は別クラスでバリテーションチェック
-                //JobService.ReceiveJobFromFront(req);
-                //await JobService.ReceiveJobFromFront(req);
+                var (isValid, errorMessage) = await _jobValidator.IsValidAsync(req);
+
+
+                if (!isValid)
+                {
+                    return BadRequest(new
+                    {
+                        message = errorMessage
+                    });
+                }
 
                 string newJobId = await _jobRepository.InsertJob(req);
 

@@ -109,14 +109,16 @@ namespace ASSTMS_STKC.Data.Repositories
         public async Task<int> DeleteOrCancelJob(string jobId)
         {
             string sql = @"
-                DELETE FROM Jobs
-                WHERE JobId = @JobId";
+               DELETE FROM Jobs
+                WHERE JobId = @JobId
+                AND JobStatus = @JobStatus";
 
             using (IDbConnection db = _context.CreateConnection())
             {
                 return db.Execute(sql, new
                 {
                     JobId = jobId,
+                    JobStatus = "PENDING"
                 });
             }
         }
