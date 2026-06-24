@@ -4,7 +4,16 @@ GET {{ASSTMS_STKC_HostAddress}}/api/front/stockers
 
 ###
 
+<<<<<<< Updated upstream
 @stockerId=string
 GET {{ASSTMS_STKC_HostAddress}}/api/front/logs/recent?stockerId={{stockerId}}
+=======
+POST {{ASSTMS_STKC_HostAddress}}/api/stub/equipment/completed
+Content-Type: application/json
+
+{
+  //JobStartReportReq
+}
+>>>>>>> Stashed changes
 
 ###
