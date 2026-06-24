@@ -81,16 +81,17 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         //5. 入庫時在個チェック判定 (SELECT)
-        public async Task<bool> ExistsCarrier(string stockerId)
+        public async Task<bool> ExistsCarrier(string stockerId, string carrierId)
         {
             string sql = @"
                 SELECT COUNT(1)
                 FROM Shelves
-                WHERE CarrierId = @CarrierId";
+                WHERE CarrierID = @CarrierId
+                AND StockerID = @StockerId";
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.ExecuteScalar<int>(sql, new { StockerId = stockerId }) > 0;
+                return db.ExecuteScalar<int>(sql, new { StockerID = stockerId, CarrierID = carrierId }) > 0;
             }
 
         }
@@ -117,11 +118,11 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                 SELECT CarrierId
                 FROM Shelves
-                WHERE ShelfId = @ShelfId";
+                WHERE ShelfName = @ShelfName";
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                var carrierId = db.QueryFirstOrDefault<string>(sql, new { ShelfId = shelfId });
+                var carrierId = db.QueryFirstOrDefault<string>(sql, new { ShelfName = shelfId });
 
                 return string.IsNullOrEmpty(carrierId);
             }

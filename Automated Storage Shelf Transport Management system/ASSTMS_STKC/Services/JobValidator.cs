@@ -37,7 +37,7 @@ namespace ASSTMS_STKC.Services
             // =================================================
             if (req.Source == "IN_PORT")
             {
-                var existsInShelf = await _shelfRepository.ExistsCarrier(req.CarrierId);
+                var existsInShelf = await _shelfRepository.ExistsCarrier(req.StockerId,req.CarrierId);
 
                 if (existsInShelf)
                 {

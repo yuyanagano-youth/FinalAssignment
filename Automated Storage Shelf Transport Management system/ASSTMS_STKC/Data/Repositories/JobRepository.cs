@@ -29,7 +29,7 @@ namespace ASSTMS_STKC.Data.Repositories
             {
                 db.Execute(sql, new
                 {
-                    JobId = newJobId,
+                    JobID = newJobId,
                     StockerID = req.StockerId,
                     CarrierID = req.CarrierId,
                     SourceLocation = req.Source,
@@ -48,8 +48,8 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                 SELECT * 
                 FROM Jobs
-                WHERE @StockerId IS NULL 
-                    OR StockerId = @StockerId;";
+                WHERE @StockerID IS NULL 
+                    OR StockerID = @StockerId;";
 
             using (IDbConnection db = _context.CreateConnection())
             {
@@ -65,7 +65,7 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                 SELECT * 
                 FROM Jobs
-                WHERE JobId = @JobId";
+                WHERE JobID = @JobId";
 
             using (IDbConnection db = _context.CreateConnection())
             {
@@ -93,13 +93,13 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                 UPDATE Jobs 
                 SET JobStatus = @Status
-                WHERE JobId = @JobId";
+                WHERE JobID = @JobId";
 
             using (IDbConnection db = _context.CreateConnection())
             {
                return db.Execute(sql, new
                 {
-                    JobId = jobId,
+                    JobID = jobId,
                     Status = status
                 });
             }
@@ -110,14 +110,14 @@ namespace ASSTMS_STKC.Data.Repositories
         {
             string sql = @"
                DELETE FROM Jobs
-                WHERE JobId = @JobId
+                WHERE JobID = @JobId
                 AND JobStatus = @JobStatus";
 
             using (IDbConnection db = _context.CreateConnection())
             {
                 return db.Execute(sql, new
                 {
-                    JobId = jobId,
+                    JobID = jobId,
                     JobStatus = "PENDING"
                 });
             }
@@ -129,9 +129,9 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                SELECT COUNT(1)
                 FROM Jobs
-                WHERE CarrierId = @CarrierId
-                AND Source = 'IN_PORT'
-                AND JobStatus IN ('WAITING', 'IN_PROGRESS')";
+                WHERE CarrierID = @CarrierId
+                AND SourceLocation = 'IN_PORT'
+                AND JobStatus IN ('PENDING', 'RUNNING')";
 
             using (IDbConnection db = _context.CreateConnection())
             {
@@ -147,8 +147,8 @@ namespace ASSTMS_STKC.Data.Repositories
                 SELECT COUNT(1)
                 FROM Jobs
                 WHERE CarrierId = @CarrierId
-                AND Destination = 'OUT_PORT'
-                AND JobStatus IN ('WAITING', 'IN_PROGRESS')";
+                AND DestLocation = 'OUT_PORT'
+                AND JobStatus IN ('PENDING', 'RUNNING')";
 
             using (IDbConnection db = _context.CreateConnection())
             {

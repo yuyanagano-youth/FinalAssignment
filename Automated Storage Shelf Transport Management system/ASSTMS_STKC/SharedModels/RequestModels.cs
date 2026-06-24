@@ -33,7 +33,7 @@ namespace ASSTMS_STKC.SharedModels
     public record PollingRes(bool HasPendingJob, Job Job);
 
     //動作開始報告(リクエスト)
-    public record JobStartReportReq(string StockerId, string JobStatus, string CurrentOperationState, Job Job);
+    public record JobStartReportReq(string? StockerId, string? JobStatus, string? CurrentOperationState, Job Job);
 
     //動作完了報告(リクエスト)
     public record JobCompleteReportReq(string StockerId, string JobStatus, string CurrentOperationState, Job Job);
