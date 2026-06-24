@@ -27,7 +27,7 @@ namespace ASSTMS_STKC.SharedModels
     public record OnlineReportReq(string StockerId, string ConnectionStatus);
 
     //定期ポーリング(リクエスト)
-    public record PollingReq(string StockerId, string ConnectionStatus);
+    public record PollingReq(string StockerId, string CurrentOperationState);
     //定期ポーリング(レスポンス)
     public record Job(string? JobId, string? Command, string? CarrierId, string? Source, string? Destination);
     public record PollingRes(bool HasPendingJob, Job Job);

@@ -109,16 +109,52 @@ namespace ASSTMS_STKC.Data.Repositories
         public async Task<int> DeleteOrCancelJob(string jobId)
         {
             string sql = @"
-                DELETE FROM Jobs
-                WHERE JobId = @JobId";
+               DELETE FROM Jobs
+                WHERE JobId = @JobId
+                AND JobStatus = @JobStatus";
 
             using (IDbConnection db = _context.CreateConnection())
             {
                 return db.Execute(sql, new
                 {
                     JobId = jobId,
+                    JobStatus = "PENDING"
                 });
             }
+        }
+
+        // 7. 入庫ジョブ（IN_PORT）が既に存在するか (SELECT)
+        public async Task<bool> ExistsInboundJob(string carrierId)
+        {
+            string sql = @"
+               SELECT COUNT(1)
+                FROM Jobs
+                WHERE CarrierId = @CarrierId
+                AND Source = 'IN_PORT'
+                AND JobStatus IN ('WAITING', 'IN_PROGRESS')";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return db.ExecuteScalar<int>(sql, new { CarrierId = carrierId }) > 0;
+            }
+
+        }
+
+        // 8. 出庫ジョブ（OUT_PORT）が既に存在するか (SELECT)
+        public async Task<bool> ExistsOutboundJob(string carrierId)
+        {
+            string sql = @"
+                SELECT COUNT(1)
+                FROM Jobs
+                WHERE CarrierId = @CarrierId
+                AND Destination = 'OUT_PORT'
+                AND JobStatus IN ('WAITING', 'IN_PROGRESS')";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return db.ExecuteScalar<int>(sql, new { CarrierId = carrierId }) > 0;
+            }
+
         }
     }
 }

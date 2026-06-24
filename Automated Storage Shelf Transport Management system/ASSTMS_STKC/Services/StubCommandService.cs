@@ -13,9 +13,25 @@ namespace ASSTMS_STKC.Services
             _httpClient = httpClient;
         }
 
-        //public async Task<bool> SendStopCommandAsync(string stockerId)
-        //{
+        public async Task<bool> SendStopCommandAsync(string stockerId)
+        {
+            var request = new OperationInstructionsReq(
+                    true,
+                    new Job(
+                    "JOB1001",
+                    "STOP",
+                    "CST-1001",
+                    "IN_PORT",
+                    "SHELF_A1"
+                    )
+                    );
 
-        //}
+            HttpResponseMessage response =
+                await _httpClient.PostAsJsonAsync(
+                    $"http://localhost:5001/equipment/stop",
+                    request);
+
+            return response.IsSuccessStatusCode;
+        }
     }
 }
