@@ -17,7 +17,7 @@
 // false : 実際の ASP.NET Core API (同一オリジン / localhost) を呼び出す。
 //         結合テスト・本番リリース時にこの値を false へ切り替えるだけでよい。
 // ============================================================================
-const USE_MOCK_API = true;
+const USE_MOCK_API = false;
 
 // 実APIのベースURL。リバースプロキシ等で配信パスが変わる場合のみ変更する。
 const API_BASE = "";
