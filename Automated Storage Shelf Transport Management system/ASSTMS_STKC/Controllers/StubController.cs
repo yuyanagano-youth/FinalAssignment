@@ -20,7 +20,12 @@ namespace ASSTMS_STKC.Controllers
         private readonly LogRepository _logRepository;
         private readonly JobRepository _jobRepository;
 
-        public StubController(StockersRepository stockersRepository, ShelfRepository shelfRepository, LogRepository logRepository, JobRepository jobRepository)
+
+        public StubController(
+            StockersRepository stockersRepository,
+            ShelfRepository shelfRepository,
+            LogRepository logRepository,
+            JobRepository jobRepository)
         {
             _stockersRepository = stockersRepository;
             _shelfRepository = shelfRepository;
@@ -33,6 +38,8 @@ namespace ASSTMS_STKC.Controllers
         [HttpPost("equipment/online")]
         public async Task<IActionResult> HandleOnlineNotifyAsync([FromBody] OnlineReportReq req)
         {
+            await _stockersRepository.updateLastSeenTime(req.StockerId);
+
             try
             {
                 if (req == null || string.IsNullOrEmpty(req.StockerId) || string.IsNullOrEmpty(req.ConnectionStatus))
@@ -60,6 +67,8 @@ namespace ASSTMS_STKC.Controllers
         [HttpPost("equipment/started")]
         public async Task<IActionResult> HandleActionStartAsync([FromBody] JobStartReportReq req)
         {
+            await _stockersRepository.updateLastSeenTime(req.StockerId);
+
             try
             {
                 //JSONデータのnull判別の方法は要確認
@@ -92,6 +101,8 @@ namespace ASSTMS_STKC.Controllers
         [HttpPost("equipment/completed")]
         public async Task<IActionResult> HandleStatusReportAsync([FromBody] JobStartReportReq req)
         {
+            await _stockersRepository.updateLastSeenTime(req.StockerId);
+
             try
             {
                 if (req == null || string.IsNullOrEmpty(req.StockerId) || string.IsNullOrEmpty(req.Job.JobId) || string.IsNullOrEmpty(req.JobStatus) || string.IsNullOrEmpty(req.CurrentOperationState))
@@ -123,6 +134,8 @@ namespace ASSTMS_STKC.Controllers
         [HttpPost("equipment/polling")]
         public async Task<IActionResult> HandleJobCheckAsync([FromBody] PollingReq req)
         {
+            await _stockersRepository.updateLastSeenTime(req.StockerId);
+
             try
             {
                 if (string.IsNullOrEmpty(req.StockerId))

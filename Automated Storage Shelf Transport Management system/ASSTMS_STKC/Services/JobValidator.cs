@@ -61,7 +61,7 @@ namespace ASSTMS_STKC.Services
                     return (false, Message);
                 }
 
-                var isShelfEmpty = await _shelfRepository.IsShelfEmpty(req.CarrierId);
+                var isShelfEmpty = await _shelfRepository.IsShelfEmpty(req.Destination);
 
                 if (isShelfEmpty)
                 {
