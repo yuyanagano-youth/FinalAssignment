@@ -120,5 +120,39 @@ namespace ASSTMS_STKC.Data.Repositories
                 });
             }
         }
+
+        // 7. 入庫ジョブ（IN_PORT）が既に存在するか (SELECT)
+        public async Task<bool> ExistsInboundJob(string carrierId)
+        {
+            string sql = @"
+               SELECT COUNT(1)
+                FROM Jobs
+                WHERE CarrierId = @CarrierId
+                AND Source = 'IN_PORT'
+                AND JobStatus IN ('WAITING', 'IN_PROGRESS')";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return db.ExecuteScalar<int>(sql, new { CarrierId = carrierId }) > 0;
+            }
+
+        }
+
+        // 8. 出庫ジョブ（OUT_PORT）が既に存在するか (SELECT)
+        public async Task<bool> ExistsOutboundJob(string carrierId)
+        {
+            string sql = @"
+                SELECT COUNT(1)
+                FROM Jobs
+                WHERE CarrierId = @CarrierId
+                AND Destination = 'OUT_PORT'
+                AND JobStatus IN ('WAITING', 'IN_PROGRESS')";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return db.ExecuteScalar<int>(sql, new { CarrierId = carrierId }) > 0;
+            }
+
+        }
     }
 }
