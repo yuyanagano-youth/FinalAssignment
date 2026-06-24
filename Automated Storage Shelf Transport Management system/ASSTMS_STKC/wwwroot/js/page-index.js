@@ -90,10 +90,16 @@
         // F-007: OFFLINE または TRAVELING のときはディスパッチ無効化
         btnDispatch.disabled = AmhsCore.isDispatchDisabled(stocker);
 
-        // alarms配列にデータがある場合はメイン画面にエラー表示＋クリアボタン相当の表示
+        // alarms配列の内容を「選択中ストッカーの現在状態」として常に反映する。
+        // 以前は alarms がある場合のみ showAlert() していたため、
+        // 一度アラームが出た後に別のストッカー（alarms無し）へ切り替えても
+        // 古いアラーム表示が消えずに残ってしまう不具合があった。
+        // → alarms が無いときは明示的に clearAlert() を呼ぶ。
         if (stocker.alarms && stocker.alarms.length > 0) {
             const msgs = stocker.alarms.map(a => `[${a.errorCode}] ${a.message}`).join(" / ");
             showAlert(msgs);
+        } else {
+            clearAlert();
         }
     }
 

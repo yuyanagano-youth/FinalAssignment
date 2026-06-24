@@ -187,7 +187,7 @@ namespace ASSTMS_STKC.Controllers
                     {
                         Success = true,
                         JobId = newJobId,
-                        Message = "搬送ジョブを受付しました。"
+                        Message = "搬送ジョブを受付しました."
                     });
                 }
 
