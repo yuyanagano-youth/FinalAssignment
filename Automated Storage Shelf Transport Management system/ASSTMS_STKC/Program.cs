@@ -1,3 +1,4 @@
+using ASSTMS_STKC.Data;
 using ASSTMS_STKC.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,9 @@ builder.Services.AddScoped<StockersRepository>();
 builder.Services.AddScoped<ShelfRepository>();
 builder.Services.AddScoped<LogRepository>();
 builder.Services.AddScoped<JobRepository>();
+builder.Services.AddScoped<SqlDatabaseContext>();
+
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

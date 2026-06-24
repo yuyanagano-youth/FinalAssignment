@@ -47,7 +47,7 @@ namespace ASSTMS_STKC.Controllers
 
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                //_logger.Error(ex);
 
                 return StatusCode(500, new
                 {
@@ -79,7 +79,7 @@ namespace ASSTMS_STKC.Controllers
 
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                //_logger.Error(ex);
 
                 return StatusCode(500, new
                 {
@@ -110,7 +110,7 @@ namespace ASSTMS_STKC.Controllers
 
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                //_logger.Error(ex);
 
                 return StatusCode(500, new
                 {
@@ -152,7 +152,7 @@ namespace ASSTMS_STKC.Controllers
 
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                //_logger.Error(ex);
 
                 return StatusCode(500, new
                 {
