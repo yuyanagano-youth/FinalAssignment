@@ -12,6 +12,11 @@ builder.Services.AddScoped<LogRepository>();
 builder.Services.AddScoped<JobRepository>();
 builder.Services.AddScoped<SqlDatabaseContext>();
 builder.Services.AddScoped<ASSTMS_STKC.Services.JobValidator>();
+builder.Services.AddScoped<ASSTMS_STKC.Services.StubCommandService>();
+builder.Services.AddHostedService<ASSTMS_STKC.Services.StockerTimeoutService>();
+builder.Services.AddHostedService<ASSTMS_STKC.Services.JobDispatcher>();
+
+
 
 builder.Services.AddHttpClient();
 

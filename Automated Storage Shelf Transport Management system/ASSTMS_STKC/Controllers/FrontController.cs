@@ -16,13 +16,15 @@ namespace ASSTMS_STKC.Controllers
         private readonly LogRepository _logRepository;
         private readonly JobRepository _jobRepository;
         private readonly JobValidator _jobValidator;
+        private readonly StubCommandService _stubCommandService;
 
         public FrontController(
             StockersRepository stockersRepository,
             ShelfRepository shelfRepository,
             LogRepository logRepository,
             JobRepository jobRepository,
-            JobValidator jobValidator
+            JobValidator jobValidator,
+            StubCommandService stubCommandService
             )
         {
             _stockersRepository = stockersRepository;
@@ -30,6 +32,7 @@ namespace ASSTMS_STKC.Controllers
             _logRepository = logRepository;
             _jobRepository = jobRepository;
             _jobValidator = jobValidator;
+            _stubCommandService = stubCommandService;
         }
 
         //保管棚状態一覧取得
@@ -175,10 +178,10 @@ namespace ASSTMS_STKC.Controllers
         {
             Console.WriteLine($"[フロント通信受信] 搬送ジョブ送信要求を受け取りました");
 
-            if (req == null || string.IsNullOrEmpty(req.Command) || string.IsNullOrEmpty(req.StockerId))
-            {
-                return BadRequest(new { Message = "必要なデータが不足しています。" });
-            }
+            //if (req == null || string.IsNullOrEmpty(req.Command) || string.IsNullOrEmpty(req.StockerId))
+            //{
+            //    return BadRequest(new { Message = "必要なデータが不足しています。" });
+            //}
 
 
             if (req.Command == "TRANSFER")
@@ -222,12 +225,13 @@ namespace ASSTMS_STKC.Controllers
 
             else if (req.Command == "STOP")
             {
-                //実際は別クラスでバリテーションチェック
-                //bool success = await StubCommandService.SendStopCommandAsync(req.StockerId);
+
                 bool success = true;
 
                 if (success == true)
                 {
+                    bool result = await _stubCommandService.SendStopCommandAsync(req.StockerId);
+
                     return Ok();
                 }
 

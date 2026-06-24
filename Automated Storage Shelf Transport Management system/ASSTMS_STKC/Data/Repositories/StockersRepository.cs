@@ -73,7 +73,7 @@ namespace ASSTMS_STKC.Data.Repositories
             //最終通信時刻が(現在時刻-設定時間)より前の時間のレコードを一括変更
             string sql = @"
                 UPDATE Stockers
-                SET OperationState = 'OFFLINE'
+                SET ConnectionStatus = 'OFFLINE'
                 WHERE LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());";
 
             using (IDbConnection db = _context.CreateConnection())
@@ -82,6 +82,39 @@ namespace ASSTMS_STKC.Data.Repositories
                 {
                     Timeout = timeoutSeconds
                 });
+            }
+        }
+
+        // 5　通信の度に最終通信時間を更新 (UPDATE)
+        public async Task<int> updateLastSeenTime(string stockerid)
+        {
+            //最終通信時刻が(現在時刻-設定時間)より前の時間のレコードを一括変更
+            string sql = @"
+                UPDATE Stockers
+                SET LastHeartbeat = GETDATE()
+                WHERE StockerID = @StockerId;";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return db.Execute(sql, new
+                {
+                    StockerID = stockerid
+                });
+            }
+        }
+
+        //6 送信用のJOBを取得
+        public async Task<IEnumerable<JobInfo>> GetPendingJobsAsync()
+        {
+            string sql = @"
+        SELECT j.* FROM Jobs j
+        INNER JOIN Stockers s ON j.StockerId = s.StockerId
+        WHERE j.JobStatus = 'PENDING'          -- 条件1: 実行待ちのJOB
+          AND s.ConnectionStatus = 'ONLINE'; -- 条件2: 保管棚がオンライン状態のもの";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return await db.QueryAsync<JobInfo>(sql);
             }
         }
     }

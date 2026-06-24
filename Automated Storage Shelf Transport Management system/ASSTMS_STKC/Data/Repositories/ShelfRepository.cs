@@ -1,6 +1,7 @@
 ﻿using ASSTMS_STKC.SharedModels.Models;
 using Dapper;
 using System.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASSTMS_STKC.Data.Repositories
 {
@@ -102,12 +103,12 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                 SELECT COUNT(1)
                 FROM Shelves
-                WHERE ShelfId = @ShelfId
+                WHERE ShelfName = @ShelfName
                 AND CarrierId = @CarrierId";
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.ExecuteScalar<int>(sql, new { ShelfId = shelfId, CarrierId = carrierId}) > 0;
+                return db.ExecuteScalar<int>(sql, new { ShelfName = shelfId, CarrierId = carrierId}) > 0;
             }
 
         }
@@ -118,13 +119,12 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                 SELECT CarrierId
                 FROM Shelves
-                WHERE ShelfName = @ShelfName";
+                WHERE ShelfName = @ShelfName
+                AND CarrierId = null";
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                var carrierId = db.QueryFirstOrDefault<string>(sql, new { ShelfName = shelfId });
-
-                return string.IsNullOrEmpty(carrierId);
+                return db.ExecuteScalar<int>(sql, new { ShelfName = shelfId}) > 0;
             }
 
         }

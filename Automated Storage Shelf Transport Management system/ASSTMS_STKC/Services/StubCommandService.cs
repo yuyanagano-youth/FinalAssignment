@@ -27,7 +27,8 @@ namespace ASSTMS_STKC.Services
                     );
 
             HttpResponseMessage response =
-                await _httpClient.PostAsJsonAsync($"http://172.16.7.19:5028",request);
+                //await _httpClient.PostAsJsonAsync($"http://172.16.7.19:5029/",request);
+                await _httpClient.PostAsJsonAsync($"http://localhost:5029/", request);
 
             return response.IsSuccessStatusCode;
         }
