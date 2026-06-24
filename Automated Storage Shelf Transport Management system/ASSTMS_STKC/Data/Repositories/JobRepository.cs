@@ -22,19 +22,19 @@ namespace ASSTMS_STKC.Data.Repositories
             string newJobId = "JOB" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
             string sql = @"
-                INSERT INTO Jobs (JobId, StockerId, CarrierId, Source, Destination, Status, CreatedAt)
-                VALUES (@JobId, @StockerId, @CarrierId, @Source, @Destination, @Status, @CreatedAt);";
+                INSERT INTO Jobs (JobID, StockerID, CarrierID, SourceLocation, DestLocation, JobStatus, CreatedAt)
+                VALUES (@JobId, @StockerId, @CarrierId, @SourceLocation, @DestLocation, @Status, @CreatedAt);";
 
             using (IDbConnection db = _context.CreateConnection())
             {
                 db.Execute(sql, new
                 {
                     JobId = newJobId,
-                    StockerId = req.StockerId,
-                    CarrierId = req.CarrierId,
-                    Source = req.Source,
-                    Destination = req.Destination,
-                    Status = "WAITING",
+                    StockerID = req.StockerId,
+                    CarrierID = req.CarrierId,
+                    SourceLocation = req.Source,
+                    DestLocation = req.Destination,
+                    Status = "PENDING",
                     CreatedAt = DateTime.Now
                 });
             }

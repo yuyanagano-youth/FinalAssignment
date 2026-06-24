@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
     <!-- 自前のApp Shell用スタイル -->
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/site.css"/>
 </head>
 <body>
 
@@ -100,13 +100,13 @@
     <script>
         // ===== PWA: Service Worker 登録 =====
         // オフライン時でもApp Shell自体は表示できるようにキャッシュ制御する。
-        if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
-        .catch(err => console.error('[PWA] Service Worker registration failed:', err));
-        });
-        }
+        // if ('serviceWorker' in navigator) {
+        // window.addEventListener('load', () => {
+        // navigator.serviceWorker.register('/sw.js')
+        // .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+        // .catch(err => console.error('[PWA] Service Worker registration failed:', err));
+        // });
+        // }
     </script>
 </body>
 </html>

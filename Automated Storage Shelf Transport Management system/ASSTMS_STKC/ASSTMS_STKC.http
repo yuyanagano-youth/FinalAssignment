@@ -17,3 +17,7 @@ Content-Type: application/json
 >>>>>>> Stashed changes
 
 ###
+
+GET {{ASSTMS_STKC_HostAddress}}/api/front/logs/recent?stockerId={{stockerId}}
+
+###

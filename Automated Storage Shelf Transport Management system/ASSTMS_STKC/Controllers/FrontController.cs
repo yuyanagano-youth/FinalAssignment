@@ -16,7 +16,7 @@ namespace ASSTMS_STKC.Controllers
         private readonly LogRepository _logRepository;
         private readonly JobRepository _jobRepository;
 
-        public FrontController(StockersRepository stockersRepository,ShelfRepository shelfRepository,LogRepository logRepository,JobRepository jobRepository)
+        public FrontController(StockersRepository stockersRepository, ShelfRepository shelfRepository, LogRepository logRepository, JobRepository jobRepository)
         {
             _stockersRepository = stockersRepository;
             _shelfRepository = shelfRepository;
