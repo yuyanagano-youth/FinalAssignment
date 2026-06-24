@@ -16,78 +16,94 @@ namespace ASSTMS_STKC.Services
             _jobRepository = jobRepository;
         }
 
-        public bool IsValid(JobCreateReq request, out string errorMessage)
+        public async Task<(bool isValid, string errorMessage)> IsValidAsync(JobCreateReq req)
         {
-            errorMessage = string.Empty;
+            string Message = string.Empty;
 
-            if (request == null)
+            if (req == null)
             {
-                errorMessage = "リクエストがnullです";
-                return false;
+                Message = "リクエストがnullです";
+                return (false, Message);
             }
 
-            if (request.Source == "IN_PORT" && request.Destination == "OUT_PORT")
+            if (req.Source == "IN_PORT" && req.Destination == "OUT_PORT")
             {
-                errorMessage = "ポート同士の搬送はできません";
-                return false;
+                Message = "ポート同士の搬送はできません";
+                return (false, Message);
             }
 
             // =================================================
             // 入庫判定
             // =================================================
-            if (request.Source == "IN_PORT")
+            if (req.Source == "IN_PORT")
             {
-                var existsInShelf = _shelfRepository.ExistsCarrier(request.CarrierId);
+                var existsInShelf = await _shelfRepository.ExistsCarrier(req.CarrierId);
 
                 if (existsInShelf)
                 {
-                    errorMessage = "同じキャリアIDが既に棚に存在します";
-                    return false;
+                    Message = "同じキャリアIDが既に棚に存在します";
+                    return (false, Message);
                 }
 
-                var hasEmptyShelf = _shelfRepository.HasEmptyShelf();
+                var hasEmptyShelf = await _shelfRepository.HasEmptyShelf(req.StockerId);
 
                 if (!hasEmptyShelf)
                 {
-                    errorMessage = "空き棚がありません";
-                    return false;
+                    Message = "空き棚がありません";
+                    return (false, Message);
                 }
 
-                var duplicateJob = _jobRepository.ExistsInboundJob(request.CarrierId);
+                var duplicateJob = await _jobRepository.ExistsInboundJob(req.CarrierId);
 
                 if (duplicateJob)
                 {
-                    errorMessage = "同じキャリアの入庫指示が既に存在します";
-                    return false;
+                    Message = "同じキャリアの入庫指示が既に存在します";
+                    return (false, Message);
                 }
+
+                var isShelfEmpty = await _shelfRepository.IsShelfEmpty(req.CarrierId);
+
+                if (isShelfEmpty)
+                {
+                    Message = "指定された棚には既に在庫が存在します";
+                    return (false, Message);
+                }
+
+
+                return (true, string.Empty);
             }
 
             // =================================================
             // 出庫判定
             // =================================================
-            if (request.Destination == "OUT_PORT")
+            else if (req.Destination == "OUT_PORT")
             {
-                var existsInShelf =
-                    _shelfRepository.ExistsCarrierInSourceShelf(
-                        request.Source,
-                        request.CarrierId);
+                var existsInShelf = await _shelfRepository.ExistsCarrierInSourceShelf(req.Source,req.CarrierId);
 
                 if (!existsInShelf)
                 {
-                    errorMessage = "指定棚にキャリアが存在しません（在庫なし）";
-                    return false;
+                    Message = "指定棚にキャリアが存在しません（在庫なし）";
+                    return (false, Message);
                 }
 
-                var duplicateJob = _jobRepository.ExistsOutboundJob(request.CarrierId);
+                var duplicateJob = await _jobRepository.ExistsOutboundJob(req.CarrierId);
 
                 if (duplicateJob)
                 {
-                    errorMessage = "同じキャリアの出庫指示が既に存在します";
-                    return false;
+                    Message = "同じキャリアの出庫指示が既に存在します";
+                    return (false, Message);
                 }
+
+                return (true, string.Empty);
             }
 
-            return true;
+            else
+            {
+                Message = "棚から棚への搬送はできません";
+                return (false, Message);
+            }
+            
+
         }
     }
 }

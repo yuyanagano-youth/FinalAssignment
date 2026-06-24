@@ -63,5 +63,69 @@ namespace ASSTMS_STKC.Data.Repositories
                 });
             }
         }
+
+        //4. 空き棚判定 (SELECT)
+        public async Task<bool> HasEmptyShelf(string stockerId)
+        {
+            string sql = @"
+                SELECT COUNT(1)
+                FROM Shelves
+                WHERE CarrierId IS NULL
+                AND StockerId = @StockerId;";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return db.ExecuteScalar<int>(sql, new {StockerId = stockerId}) > 0;
+            }
+
+        }
+
+        //5. 入庫時在個チェック判定 (SELECT)
+        public async Task<bool> ExistsCarrier(string stockerId)
+        {
+            string sql = @"
+                SELECT COUNT(1)
+                FROM Shelves
+                WHERE CarrierId = @CarrierId";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return db.ExecuteScalar<int>(sql, new { StockerId = stockerId }) > 0;
+            }
+
+        }
+
+        //6. 指定棚にキャリアがあるか判定 (SELECT)
+        public async Task<bool> ExistsCarrierInSourceShelf(string shelfId, string carrierId)
+        {
+            string sql = @"
+                SELECT COUNT(1)
+                FROM Shelves
+                WHERE ShelfId = @ShelfId
+                AND CarrierId = @CarrierId";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return db.ExecuteScalar<int>(sql, new { ShelfId = shelfId, CarrierId = carrierId}) > 0;
+            }
+
+        }
+
+        //7. 指定棚が空いてるか判定 (SELECT)
+        public async Task<bool> IsShelfEmpty(string shelfId)
+        {
+            string sql = @"
+                SELECT CarrierId
+                FROM Shelves
+                WHERE ShelfId = @ShelfId";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                var carrierId = db.QueryFirstOrDefault<string>(sql, new { ShelfId = shelfId });
+
+                return string.IsNullOrEmpty(carrierId);
+            }
+
+        }
     }
 }
