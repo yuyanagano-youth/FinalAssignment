@@ -149,8 +149,8 @@ const MockServer = (() => {
         const url = new URL(path, "https://mock.local");
         const segments = url.pathname.split("/").filter(Boolean); // ["api","stockers"] 等
 
-        // ---- GET /api/stockers ----
-        if (method === "GET" && url.pathname === "/api/stockers") {
+        // ---- GET /api/front/stockers ----
+        if (method === "GET" && url.pathname === "/api/front/stockers") {
             return ok(db.stockers);
         }
 
