@@ -159,41 +159,54 @@
             clearAlert();
             showToast("ジョブの送信に成功しました");
             carrierIdInput.value = "";
-            logPoll(`POST /api/equipment/command OK jobId=${res.data.jobId}`);
+            logPoll(`POST /api/front/equipment/command OK jobId=${res.data.jobId}`);
         } else {
             // HTTP 400: サーバーから返却されたmessageを赤文字で即時描画（F-003）
             const msg = res.data?.message || "サーバーエラーが発生しました";
             showAlert(`[${res.data?.errorCode || "ERR"}] ${msg}`);
-            logPoll(`POST /api/equipment/command 失敗: ${msg}`, true);
+            logPoll(`POST /api/front/equipment/command 失敗: ${msg}`, true);
         }
 
         await refreshStockerStatus();
     }
 
-    /** E-STOP（即時割り込み） */
+    /**
+     * STOP（停止指示）送信
+     * 【仕様書 2.1-②より】command="STOP" のリクエストサンプルは
+     * stockerId/carrierId/source/destination がすべて null になっている。
+     * → 個別ストッカーではなく、システム全体を停止させる命令である可能性が高い。
+     * 現状は仕様書のサンプルどおり全フィールドnullで送信する。
+     * 【要確認】画面で選択中のストッカーだけを止めたい場合は、
+     * バックエンド担当者と「STOPの対象スコープ」を確認すること。
+     */
     async function handleEStopClick() {
-        const stockerId = stockerSelect.value;
-        if (!stockerId) return;
-        if (!confirm("緊急停止コマンドを送信します。よろしいですか？")) return;
+        if (!confirm("停止コマンドを送信します。よろしいですか？")) return;
 
         const res = await AmhsCore.postEquipmentCommand({
-            command: AmhsCore.Status.Command.ESTOP,
-            stockerId
+            command: AmhsCore.Status.Command.STOP,
+            stockerId: null,
+            carrierId: null,
+            source: null,
+            destination: null
         });
 
+        // 【仕様書より】STOP成功時のレスポンスは空の {} オブジェクトのため、
+        // res.data?.success のようなフィールドは存在しない。res.ok のみで判定する。
         if (res.ok) {
-            showToast("E-STOPコマンドを送信しました");
-            logPoll(`POST /api/equipment/command (ESTOP) OK`);
+            showToast("STOPコマンドを送信しました");
+            logPoll(`POST /api/front/equipment/command (STOP) OK`);
         } else {
-            showAlert(res.data?.message || "E-STOP送信に失敗しました");
+            showAlert(res.data?.message || "STOP送信に失敗しました");
         }
         await refreshStockerStatus();
     }
 
     /**
-     * 【ポーリング通信テスト】
-     * コンソールアプリ（C#）が3秒ごとに送るハートビートを疑似的に1回発行し、
-     * 仮想JSONサーバーとの往復が正しく機能していることを確認するためのテスト関数。
+     * 【デバッグ専用】コンソールアプリ(C#)担当の死活監視エンドポイント
+     * (POST /api/stub/equipment/polling) に疑似的に1回アクセスし、
+     * バックエンドが正しく応答するかをフロント側から確認するためのテスト関数。
+     * 本来このAPIはWebフロントエンドの担当範囲外（コンソール⇔サーバー間専用）。
+     * コンソールアプリが実装されるまでの「バックエンド単体テスト」目的でのみ使用する。
      */
     async function simulateConsoleHeartbeatOnce() {
         const stockerId = stockerSelect.value;
@@ -202,15 +215,15 @@
             return;
         }
         const payload = { stockerId, currentOperationState: AmhsCore.Status.Operation.IDLE };
-        logPoll(`POST /api/equipment/heartbeat 送信 -> ${JSON.stringify(payload)}`);
+        logPoll(`[デバッグ] POST /api/stub/equipment/polling 送信 -> ${JSON.stringify(payload)}`);
 
-        const res = await AmhsCore.postHeartbeat(payload);
+        const res = await AmhsCore.postConsolePollingDebug(payload);
 
         if (res.ok) {
-            logPoll(`POST /api/equipment/heartbeat 応答 <- hasPendingJob=${res.data.hasPendingJob}` +
-                (res.data.hasPendingJob ? ` job=${JSON.stringify(res.data.job)}` : ""));
+            logPoll(`[デバッグ] POST /api/stub/equipment/polling 応答 <- hasPendingJob=${res.data?.hasPendingJob}` +
+                (res.data?.hasPendingJob ? ` job=${JSON.stringify(res.data.job)}` : ""));
         } else {
-            logPoll(`POST /api/equipment/heartbeat 失敗 (status=${res.status})`, true);
+            logPoll(`[デバッグ] POST /api/stub/equipment/polling 失敗 (status=${res.status}) ${res.data?.message || ""}`, true);
         }
         await refreshStockerStatus();
     }

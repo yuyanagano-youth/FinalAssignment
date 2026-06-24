@@ -107,6 +107,7 @@ const MockServer = (() => {
         ]
     };
 
+
     /**
      * sessionStorageから前回の状態を復元する。
      * 保存データが無い（＝このタブで初回アクセス）場合はseedDbをそのまま使う。
@@ -142,20 +143,21 @@ const MockServer = (() => {
     /**
      * ルーティング本体。method + path + (body) を受け取り、
      * 本物のfetch Responseに似せた { ok, status, json() } を返す。
+     * 【仕様書2.1/2.2準拠】フロント向けは /api/front/*、コンソール向けは /api/stub/*。
      */
     async function handle(method, path, body) {
         await wait(randomLatency());
 
         const url = new URL(path, "https://mock.local");
-        const segments = url.pathname.split("/").filter(Boolean); // ["api","stockers"] 等
+        const segments = url.pathname.split("/").filter(Boolean); // ["api","front","stockers"] 等
 
         // ---- GET /api/front/stockers ----
         if (method === "GET" && url.pathname === "/api/front/stockers") {
             return ok(db.stockers);
         }
 
-        // ---- GET /api/jobs/active?stockerId=... ----
-        if (method === "GET" && url.pathname === "/api/jobs/active") {
+        // ---- GET /api/front/jobs/active?stockerId=... ----
+        if (method === "GET" && url.pathname === "/api/front/jobs/active") {
             const stockerId = url.searchParams.get("stockerId");
             const list = db.jobs.filter(j =>
                 (j.status === "PENDING" || j.status === "RUNNING") &&
@@ -164,9 +166,9 @@ const MockServer = (() => {
             return ok(list);
         }
 
-        // ---- DELETE /api/jobs/{jobId} ----
-        if (method === "DELETE" && segments[0] === "api" && segments[1] === "jobs" && segments[2]) {
-            const jobId = segments[2];
+        // ---- DELETE /api/front/jobs/{jobId} ----
+        if (method === "DELETE" && segments[0] === "api" && segments[1] === "front" && segments[2] === "jobs" && segments[3]) {
+            const jobId = segments[3];
             const idx = db.jobs.findIndex(j => j.jobId === jobId);
             if (idx === -1) {
                 return notFound({ success: false, message: "ジョブ削除に失敗しました" }); // UI-008
@@ -176,14 +178,14 @@ const MockServer = (() => {
             return ok({ success: true });
         }
 
-        // ---- GET /api/inventory/shelves?stockerId=... ----
-        if (method === "GET" && url.pathname === "/api/inventory/shelves") {
+        // ---- GET /api/front/inventory/shelves?stockerId=... ----
+        if (method === "GET" && url.pathname === "/api/front/inventory/shelves") {
             const stockerId = url.searchParams.get("stockerId");
             return ok(db.shelves[stockerId] || []);
         }
 
-        // ---- GET /api/logs/recent?stockerId=...  (互換: /api/History/) ----
-        if (method === "GET" && (url.pathname === "/api/logs/recent" || url.pathname === "/api/History")) {
+        // ---- GET /api/front/logs/recent?stockerId=...  (互換: /api/History/) ----
+        if (method === "GET" && (url.pathname === "/api/front/logs/recent" || url.pathname === "/api/History")) {
             const stockerId = url.searchParams.get("stockerId");
             let list = db.logs.slice();
             if (stockerId) list = list.filter(l => l.stockerId === stockerId);
@@ -191,37 +193,37 @@ const MockServer = (() => {
             return ok(list);
         }
 
-        // ---- POST /api/equipment/command ----
-        if (method === "POST" && url.pathname === "/api/equipment/command") {
+        // ---- POST /api/front/equipment/command ----
+        if (method === "POST" && url.pathname === "/api/front/equipment/command") {
             return handleEquipmentCommand(body);
         }
 
-        // ---- POST /api/equipment/heartbeat（コンソールアプリ側のポーリング模擬用） ----
-        if (method === "POST" && (url.pathname === "/api/equipment/heartbeat" || url.pathname === "/api/equipment/Polling")) {
+        // ---- POST /api/stub/equipment/polling（コンソールアプリ専用・デバッグ目的でのみフロントから疑似アクセス） ----
+        if (method === "POST" && url.pathname === "/api/stub/equipment/polling") {
             return handleHeartbeat(body);
         }
 
-        return notFound({ success: false, message: `Mock route not found: ${method} ${path}` });
+        return notFound({ message: "Webページが見つからない" }); // 仕様書2.2準拠の404メッセージ
     }
 
     function handleEquipmentCommand(body) {
+        // ---- STOP: 仕様書サンプルでは stockerId 等が全てnull＝システム全体への停止指示 ----
+        // 個別ストッカー検索の前に分岐する（stockerIdがnullのため検索に引っかからない）
+        if (body.command === "STOP") {
+            db.stockers.forEach(s => { s.operationState = "ALARM"; });
+            db.jobs.forEach(j => {
+                if (j.status === "PENDING" || j.status === "RUNNING") j.status = "ABORTED";
+            });
+            db.logs.unshift({ timestamp: new Date().toISOString(), level: "ALARM", message: "STOP命令が実行されました（全ストッカー対象）", stockerId: null });
+            persist();
+            // 【仕様書より】STOP成功時のレスポンスは空オブジェクト {}
+            return ok({});
+        }
+
         const stocker = db.stockers.find(s => s.stockerId === body.stockerId);
 
         if (!stocker) {
             return badRequest({ success: false, jobId: null, errorCode: "ERR-404", message: "指定されたストッカーが見つかりません" });
-        }
-
-        // ---- ESTOP: 即時割り込み ----
-        if (body.command === "ESTOP") {
-            stocker.operationState = "ALARM";
-            db.jobs.forEach(j => {
-                if (j.stockerId === body.stockerId && (j.status === "PENDING" || j.status === "RUNNING")) {
-                    j.status = "ABORTED";
-                }
-            });
-            db.logs.unshift({ timestamp: new Date().toISOString(), level: "ALARM", message: "緊急停止(E-STOP)が実行されました", stockerId: body.stockerId });
-            persist();
-            return ok({ success: true, jobId: null, message: "E-STOP command executed." });
         }
 
         // ---- TRANSFER: F-003 バリデーション ----
@@ -309,3 +311,4 @@ const MockServer = (() => {
 
     return { handle, resetToSeed };
 })();
+

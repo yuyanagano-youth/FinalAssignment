@@ -1,0 +1,10 @@
+﻿@ASSTMS_STKC_HostAddress = https://localhost:7196
+
+GET {{ASSTMS_STKC_HostAddress}}/api/front/stockers
+
+###
+
+@stockerId=string
+GET {{ASSTMS_STKC_HostAddress}}/api/front/logs/recent?stockerId={{stockerId}}
+
+###

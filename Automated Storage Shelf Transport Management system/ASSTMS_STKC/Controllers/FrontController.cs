@@ -28,13 +28,13 @@ namespace ASSTMS_STKC.Controllers
         [HttpGet("stockers")]
         public async Task<IActionResult> GetStockerListAsync()
         {
-            //var list = new List<StockerIndexRes>
-            //{
-            //    new StockerIndexRes("STK001", "ストッカー1", "Active", "ONLINE", "IDLE", new Alarms("ER-001","異常が発生しました")),
-            //    new StockerIndexRes("STK002", "ストッカー2", "Active", "OFFLINE", "TRAVELING", new Alarms("ER-002","異常"))
-            //};
+            var list = new List<StockerIndexRes>
+            {
+                new StockerIndexRes("STK001", "ストッカー1", "Active", "ONLINE", "IDLE", new Alarms("ER-001","異常が発生しました")),
+                new StockerIndexRes("STK002", "ストッカー2", "Active", "OFFLINE", "TRAVELING", new Alarms("ER-002","異常"))
+            };
 
-            //return Ok(list);
+            return Ok(list);
 
             List<StockInfo> stockerList = await _stockersRepository.GetStockerStatusesForFront();
 
@@ -56,11 +56,11 @@ namespace ASSTMS_STKC.Controllers
         [HttpGet("jobs/active")]
         public async Task<IActionResult> GetJobListAsync([FromQuery] string? stockerId)
         {
-            //var list = new List<JobIndexRes>
-            //{
-            //    new JobIndexRes("JOB001", "STK001", "C001", "P01", "P02", "IDLE"),
-            //    new JobIndexRes("JOB002", "STK002", "C002", "P03", "P04", "TRAVELING")
-            //};
+            var list = new List<JobIndexRes>
+            {
+                new JobIndexRes("JOB001", "STK001", "C001", "P01", "P02", "IDLE"),
+                new JobIndexRes("JOB002", "STK002", "C002", "P03", "P04", "TRAVELING")
+            };
 
             //return Ok(list);
 
@@ -95,11 +95,11 @@ namespace ASSTMS_STKC.Controllers
         [HttpGet("inventory/shelves")]
         public async Task<IActionResult> GetShelfListAsync([FromQuery] string? stockerId)
         {
-            //var list = new List<ShelfStockIndexRes>
-            //{
-            //    new ShelfStockIndexRes("R001", "C001", DateTime.Now),
-            //    new ShelfStockIndexRes("R002", "C002", DateTime.Now)
-            //};
+            var list = new List<ShelfStockIndexRes>
+            {
+                new ShelfStockIndexRes("R001", "C001", DateTime.Now),
+                new ShelfStockIndexRes("R002", "C002", DateTime.Now)
+            };
 
             //return Ok(list);
 
@@ -130,11 +130,11 @@ namespace ASSTMS_STKC.Controllers
         [HttpGet("logs/recent")]
         public async Task<IActionResult> GetLogListAsync([FromQuery] string? stockerId)
         {
-            //var list = new List<ShelfStockIndexRes>
-            //{
-            //    new ShelfStockIndexRes("R001", "C001", DateTime.Now),
-            //    new ShelfStockIndexRes("R002", "C002", DateTime.Now)
-            //};
+            var list = new List<ShelfStockIndexRes>
+            {
+                new ShelfStockIndexRes("R001", "C001", DateTime.Now),
+                new ShelfStockIndexRes("R002", "C002", DateTime.Now)
+            };
 
             //return Ok(list);
 
