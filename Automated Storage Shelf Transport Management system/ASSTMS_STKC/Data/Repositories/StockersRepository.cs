@@ -1,6 +1,8 @@
-﻿using ASSTMS_STKC.SharedModels.Models;
+﻿using ASSTMS_STKC.SharedModels;
+using ASSTMS_STKC.SharedModels.Models;
 using Dapper;
 using System.Data;
+using System.Text.Json;
 
 namespace ASSTMS_STKC.Data.Repositories
 {

@@ -53,7 +53,8 @@ namespace ASSTMS_STKC.Data.Repositories
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.Query<JobInfo>(sql).ToList();
+                var result = await db.QueryAsync<JobInfo>(sql, new { StockerId = stockerId });
+                return result.ToList();
             }
 
         }

@@ -30,9 +30,11 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllers();
-app.MapStaticAssets();
-app.MapRazorPages()
-   .WithStaticAssets();
+//app.MapStaticAssets();
+//app.MapRazorPages()
+//   .WithStaticAssets();
+app.UseStaticFiles();
+
+app.MapRazorPages();
 
 app.Run();
