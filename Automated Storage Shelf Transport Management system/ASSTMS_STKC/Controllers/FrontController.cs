@@ -177,6 +177,8 @@ namespace ASSTMS_STKC.Controllers
             {
                 //実際は別クラスでバリテーションチェック
                 //JobService.ReceiveJobFromFront(req);
+                //await JobService.ReceiveJobFromFront(req);
+
                 string newJobId = await _jobRepository.InsertJob(req);
 
                 Console.WriteLine($"JOBを生成しました。ID: {newJobId}, 搬送元: {req.Source} -> 搬送先: {req.Destination}");
