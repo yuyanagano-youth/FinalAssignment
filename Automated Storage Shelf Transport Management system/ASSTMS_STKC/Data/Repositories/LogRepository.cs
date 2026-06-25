@@ -16,21 +16,22 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 1. ログの新規登録 (INSERT)
-        public async Task<int> InsertLog(DeviceLog log)
+        public async Task<int> InsertLog(string stockerId, string level, string message)
         {
             string sql = @"
-                INSERT INTO Logs (LogID, Timestamp, StockerID, Level, Message)
-                VALUES (@LogId, @TimeStamp, @StockerId, @Level, @Message);";
+                INSERT INTO Logs (Timestamp, StockerID, Level, Message)
+                VALUES (@TimeStamp, @StockerId, @Level, @Message);";
 
             using (IDbConnection db = _context.CreateConnection())
             {
                 return db.Execute(sql, new
                 {
-                    LogId = log.LogId,
-                    Timestamp = log.Timestamp,
-                    StockerId = log.StockerId,
-                    Level = log.Level,
-                    Messege = log.Message,
+                    //LogId = log.LogId,
+                    //Timestamp = log.Timestamp,
+                    Timestamp = DateTime.Now,
+                    StockerId = stockerId,
+                    Level = level,
+                    Message = message,
                 });
             }
 

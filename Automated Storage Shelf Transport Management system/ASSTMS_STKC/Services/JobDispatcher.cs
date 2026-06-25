@@ -25,10 +25,9 @@ namespace ASSTMS_STKC.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine("JobDispatchService (JOB自動送信サービス) が起動しました。");
 
             // 3秒ごとに DB の JOB テーブルを監視する
-            _timer = new Timer(PollAndDispatchJobs, null, TimeSpan.Zero, TimeSpan.FromSeconds(3));
+            _timer = new Timer(PollAndDispatchJobs, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
             return Task.CompletedTask;
         }
 
@@ -46,7 +45,6 @@ namespace ASSTMS_STKC.Services
 
                     foreach (var job in pendingJobs)
                     {
-                        Console.WriteLine($"[JOB送信] 条件一致のJOBを発見しました。 (JobID: {job.JobId})");
 
                         var jobRecord = new Job(
                                 JobId: job.JobId,
@@ -79,7 +77,7 @@ namespace ASSTMS_STKC.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[JOB監視エラー] {ex.Message}");
+                Console.WriteLine($"{ex.Message}");
             }
         }
 

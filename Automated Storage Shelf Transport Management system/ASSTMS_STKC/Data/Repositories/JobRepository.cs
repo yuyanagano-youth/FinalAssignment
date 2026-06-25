@@ -107,7 +107,7 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 6. JOB削除 (DELETE)
-        public async Task<int> DeleteOrCancelJob(string jobId)
+        public async Task<bool> DeleteOrCancelJob(string jobId)
         {
             string sql = @"
                DELETE FROM Jobs
@@ -116,11 +116,7 @@ namespace ASSTMS_STKC.Data.Repositories
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.Execute(sql, new
-                {
-                    JobID = jobId,
-                    JobStatus = "PENDING"
-                });
+                return db.Execute(sql, new{JobID = jobId, JobStatus = "PENDING" }) > 0;
             }
         }
 
