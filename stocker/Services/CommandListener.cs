@@ -115,36 +115,14 @@ public class CommandListener
             {
                 // HTTPリクエスト受信待ち
                 HttpListenerContext? context = await _listener.GetContextAsync();
-                //// エラー確認用
-                //Console.WriteLine("Push受信待ち");
-                //Console.WriteLine(context.Request.Url);
 
-                //// エラー確認用
-                //Console.WriteLine("Push受信");
                 // リクエストボディ読込
                 using StreamReader reader = new(context.Request.InputStream);
 
                 string requestBody = await reader.ReadToEndAsync();
 
-
-                //// エラー確認用
-                //Console.WriteLine(requestBody);
-
-
                 // JSON → CommandRequest変換
                 CommandRequest? request = ParseRequest(requestBody);
-
-
-                //// エラー確認用
-                //Console.WriteLine(request == null ? "request=null":"request OK");
-                //Console.WriteLine($"Type = {request?.GetType().FullName}");
-
-                //if (request?.Job != null)
-                //{
-                //    Console.WriteLine($"JobId={request.Job.JobId}");
-                //    Console.WriteLine($"Command={request.Job.Command}");
-                //}
-
 
                 // リクエスト解析失敗
                 if (request == null)
@@ -162,20 +140,13 @@ public class CommandListener
                     context.Response.Close();
                     continue;
                 }
-
-                //// エラー確認用
-                //Console.WriteLine($"JobId={request.Job.JobId}"); ;
-                //Console.WriteLine($"Command={request.Job.Command}");
-
-                //await _dispatcher.Dispatch(request.Job);
-
-                //Console.WriteLine("Dispatch終了");
+                Console.WriteLine($"受信時刻 : {DateTime.Now:HH:mm:ss}");
 
                 // JOB実行中の場合
                 // STOP指示のみ受け付け新規JOBは受け付けずPENDING返却
                 if (request.Job.Command != null &&
                     request.Job.Command != "STOP" &&
-                    AppState.OperationState == OperationState.RUNNING)
+                    AppState.OperationState == OperationState.TRAVELING)
                 {
                     CommandResponse response = new()
                     {
@@ -198,9 +169,6 @@ public class CommandListener
                     continue;
                 }
 
-                //Console.WriteLine($"JobId={request.Job.JobId}"); ;
-                //Console.WriteLine($"Command={request.Job.Command}");
-
                 // IDLEならJOB実行依頼
                 await _dispatcher.Dispatch(request.Job);
 
@@ -210,13 +178,12 @@ public class CommandListener
 
                 if (request.Job.Command == "STOP")
                 {
-                    Console.WriteLine(request.Job.Command);
                     successResponse = new()
                     {
                         StockerId = "STK001",
                         JobId = request.Job.JobId,
                         JobStatus = "ABORTED",
-                        CurrentOperationState = AppState.OperationState.ToString(),
+                        CurrentOperationState = OperationState.IDLE.ToString(),
                     };
 
                 }
@@ -228,18 +195,6 @@ public class CommandListener
                         JobId = request.Job.JobId,
                     };
                 }
-
-                //string successJson =
-                //    CreateResponse(successResponse);
-
-                //Console.WriteLine(successJson);
-
-                //context.Response.StatusCode = 200;
-                //Console.WriteLine("1");
-                //using StreamWriter? successWriter =
-                //    new(context.Response.OutputStream);
-                //await successWriter.WriteAsync(successJson);
-                //context.Response.Close();
 
                 string successJson = CreateResponse(successResponse);
 

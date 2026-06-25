@@ -14,25 +14,21 @@ public class CommandDispatcher
         _jobService = jobService;
     }
 
-    public async Task Dispatch(JobInfo job)
+    public Task Dispatch(JobInfo job)
     {
 
 
 
         if (job.Command == "TRANSFER")
         {
-            await HandleTransfer(job);
-            return;
+            _ = Task.Run(() => _jobService.ExecuteJobAsync(job));
         }
-
-        if (job.Command == "STOP")
+        else if (job.Command == "STOP")
         {
-            await HandleStop(job);
-            return;
+            _ = HandleStop(job);
         }
 
-
-
+        return Task.CompletedTask;
     }
 
     public async Task HandleTransfer(JobInfo job)

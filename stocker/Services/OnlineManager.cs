@@ -62,7 +62,7 @@ public class OnlineManager
 
         _pollingService.StopPolling();
 
-        if(AppState.OperationState == OperationState.RUNNING)
+        if(AppState.OperationState == OperationState.TRAVELING)
         {
             _jobService.CancelCurrentJob();
         }

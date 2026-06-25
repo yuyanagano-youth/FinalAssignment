@@ -98,8 +98,8 @@ public class PollingService
             if (response.Job == null) { Console.WriteLine( "JOB情報が取得できません"); return response; }
 
             Console.WriteLine("Polling開始");
-            Console.WriteLine( $"JOB受信 : {response.Job.JobId}");
-            Console.WriteLine( $"Command : {response.Job.Command}");
+            //Console.WriteLine( $"JOB受信 : {response.Job.JobId}");
+            //Console.WriteLine( $"Command : {response.Job.Command}");
             // CommandDispatcherへ渡す
             await _dispatcher.Dispatch( response.Job); return response;
   

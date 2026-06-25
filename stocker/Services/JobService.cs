@@ -20,7 +20,7 @@ public class JobService
         try
         {
             Console.WriteLine($"JOB開始 : {job.JobId}");
-            AppState.OperationState = OperationState.RUNNING;
+            AppState.OperationState = OperationState.TRAVELING;
             AppState.CurrentJobId = job.JobId;
 
             AppState.CancellationTokenSource = new CancellationTokenSource();
@@ -39,6 +39,11 @@ public class JobService
         }
         catch(OperationCanceledException)
         {
+            AppState.CurrentJobId = null;
+            AppState.AcceptedJobId = null;
+            AppState.OperationState = OperationState.IDLE;
+
+
             Console.WriteLine($"JOB中断 : {job.JobId}\n");
         }
         catch (Exception ex)
@@ -49,16 +54,12 @@ public class JobService
             AppState.AcceptedJobId = null;
             AppState.OperationState = OperationState.IDLE;
         }
+
+
     }
 
     public async Task ExecuteTransferAsync(JobInfo job)
     {
-        //Console.WriteLine($"輸送開始{job.Source}→{job.Destination}");
-
-        //await Task.Delay(TimeSpan.FromSeconds(10), AppState.CancellationTokenSource!.Token);
-
-        //Console.WriteLine("輸送完了");
-
         Console.WriteLine("搬送開始\n");
 
         await Task.Delay(TimeSpan.FromSeconds(20),AppState.CancellationTokenSource!.Token);
@@ -68,7 +69,7 @@ public class JobService
 
     public async Task StopJob(string jobId)
     {
-        if(AppState.OperationState != OperationState.RUNNING)
+        if(AppState.OperationState != OperationState.TRAVELING)
         {
             Console.WriteLine("実行中JOBなし");
             return;
@@ -82,12 +83,6 @@ public class JobService
 
         CancelCurrentJob();
 
-
-
-        AppState.CurrentJobId = null;
-        AppState.AcceptedJobId = null;
-        AppState.OperationState = OperationState.IDLE;
-
         Console.WriteLine($"JOB停止 : {jobId}");
     }
 
@@ -95,10 +90,11 @@ public class JobService
     public void CancelCurrentJob()
     {
         AppState.CancellationTokenSource?.Cancel();
+        Console.WriteLine("Cancel要求");
     }
 
     public bool IsRunning()
     {
-        return AppState.OperationState == OperationState.RUNNING;
+        return AppState.OperationState == OperationState.TRAVELING;
     }
 }

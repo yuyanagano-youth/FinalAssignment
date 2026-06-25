@@ -7,6 +7,6 @@ namespace stocker.Enums
     public enum OperationState
     {
         IDLE,
-        RUNNING
+        TRAVELING
     }
 }
