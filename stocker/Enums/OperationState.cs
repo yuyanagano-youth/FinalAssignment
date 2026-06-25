@@ -6,7 +6,7 @@ namespace stocker.Enums
 {
     public enum OperationState
     {
-        IDLE = 0,
-        RUNNING = 1
+        IDLE,
+        RUNNING
     }
 }

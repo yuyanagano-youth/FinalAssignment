@@ -4,6 +4,7 @@ using stocker.Enums;
 using stocker.Models;
 using stocker.Services;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace stocker.Services;
@@ -36,12 +37,7 @@ public class CommandListener
             _listener = new HttpListener();
             // 受信町アドレス登録
 
-            //string prefix = "http//172.16.7.6:5028/api/stub/equipment/instruction";
-
-            //Console.WriteLine(prefix);
-
-
-            _listener.Prefixes.Add("http://*:5028/");
+            _listener.Prefixes.Add("http://*:5029/");
 
             _listener.Start();
 
@@ -84,7 +80,12 @@ public class CommandListener
     /// <returns>CommandRequest</returns>
     public CommandRequest? ParseRequest(string requestBody)
     {
-        return JsonSerializer.Deserialize<CommandRequest>(requestBody);
+        var option = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        return JsonSerializer.Deserialize<CommandRequest>(requestBody, option);
 
     }
 
@@ -96,6 +97,8 @@ public class CommandListener
     /// <returns>JSON文字列</returns>
     public string CreateResponse(CommandResponse response)
     {
+
+
         return JsonSerializer.Serialize(response);
     }
 
@@ -111,16 +114,36 @@ public class CommandListener
             try
             {
                 // HTTPリクエスト受信待ち
-                var context = await _listener.GetContextAsync();
+                HttpListenerContext? context = await _listener.GetContextAsync();
+                //// エラー確認用
+                //Console.WriteLine("Push受信待ち");
+                //Console.WriteLine(context.Request.Url);
 
-
+                //// エラー確認用
+                //Console.WriteLine("Push受信");
                 // リクエストボディ読込
-                using var reader = new StreamReader(context.Request.InputStream);
+                using StreamReader reader = new(context.Request.InputStream);
 
                 string requestBody = await reader.ReadToEndAsync();
 
+
+                //// エラー確認用
+                //Console.WriteLine(requestBody);
+
+
                 // JSON → CommandRequest変換
                 CommandRequest? request = ParseRequest(requestBody);
+
+
+                //// エラー確認用
+                //Console.WriteLine(request == null ? "request=null":"request OK");
+                //Console.WriteLine($"Type = {request?.GetType().FullName}");
+
+                //if (request?.Job != null)
+                //{
+                //    Console.WriteLine($"JobId={request.Job.JobId}");
+                //    Console.WriteLine($"Command={request.Job.Command}");
+                //}
 
 
                 // リクエスト解析失敗
@@ -128,21 +151,31 @@ public class CommandListener
                 {
                     context.Response.StatusCode = 400;
                     context.Response.Close();
-                    return;
+                    continue;
                 }
 
                 // JOB情報未設定
                 if (request.Job == null)
                 {
+                    Console.WriteLine("Job == null");
                     context.Response.StatusCode = 400;
                     context.Response.Close();
-                    return;
+                    continue;
                 }
 
+                //// エラー確認用
+                //Console.WriteLine($"JobId={request.Job.JobId}"); ;
+                //Console.WriteLine($"Command={request.Job.Command}");
+
+                //await _dispatcher.Dispatch(request.Job);
+
+                //Console.WriteLine("Dispatch終了");
 
                 // JOB実行中の場合
-                // 新規JOBは受け付けずPENDING返却
-                if (AppState.OperationState == OperationState.RUNNING)
+                // STOP指示のみ受け付け新規JOBは受け付けずPENDING返却
+                if (request.Job.Command != null &&
+                    request.Job.Command != "STOP" &&
+                    AppState.OperationState == OperationState.RUNNING)
                 {
                     CommandResponse response = new()
                     {
@@ -155,7 +188,7 @@ public class CommandListener
 
                     context.Response.StatusCode = 200;
 
-                    using var writer = new StreamWriter(context.Response.OutputStream);
+                    using StreamWriter? writer = new(context.Response.OutputStream);
 
                     await writer.WriteAsync(responseJson);
 
@@ -165,29 +198,75 @@ public class CommandListener
                     continue;
                 }
 
+                //Console.WriteLine($"JobId={request.Job.JobId}"); ;
+                //Console.WriteLine($"Command={request.Job.Command}");
+
                 // IDLEならJOB実行依頼
                 await _dispatcher.Dispatch(request.Job);
 
 
                 // 実行受付成功レスポンス生成
-                CommandResponse successResponse = new()
-                {
-                    StockerId = "STK001",
-                    JobId = request.Job.JobId
-                };
+                CommandResponse successResponse;
 
-                string successJson =
-                    CreateResponse(successResponse);
+                if (request.Job.Command == "STOP")
+                {
+                    Console.WriteLine(request.Job.Command);
+                    successResponse = new()
+                    {
+                        StockerId = "STK001",
+                        JobId = request.Job.JobId,
+                        JobStatus = "ABORTED",
+                        CurrentOperationState = AppState.OperationState.ToString(),
+                    };
+
+                }
+                else
+                {
+                    successResponse = new()
+                    {
+                        StockerId = "STK001",
+                        JobId = request.Job.JobId,
+                    };
+                }
+
+                //string successJson =
+                //    CreateResponse(successResponse);
+
+                //Console.WriteLine(successJson);
+
+                //context.Response.StatusCode = 200;
+                //Console.WriteLine("1");
+                //using StreamWriter? successWriter =
+                //    new(context.Response.OutputStream);
+                //await successWriter.WriteAsync(successJson);
+                //context.Response.Close();
+
+                string successJson = CreateResponse(successResponse);
+
+                byte[] buffer = Encoding.UTF8.GetBytes(successJson);
 
                 context.Response.StatusCode = 200;
+                context.Response.ContentType = "application/json";
+                context.Response.ContentLength64 = buffer.Length;
 
-                using var successWriter =
-                    new StreamWriter(context.Response.OutputStream);
+                await context.Response.OutputStream.WriteAsync(
+                    buffer,
+                    0,
+                    buffer.Length);
 
-                await successWriter.WriteAsync(successJson);
+                await context.Response.OutputStream.FlushAsync();
 
                 context.Response.Close();
             }
+            catch (HttpListenerException)
+            {
+                Console.WriteLine("Listener停止");
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("Listener停止");
+            }
+
             catch (Exception ex)
             {
                 // 想定外エラー

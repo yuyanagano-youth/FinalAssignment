@@ -16,19 +16,22 @@ public class CommandDispatcher
 
     public async Task Dispatch(JobInfo job)
     {
-        if (job.Command == CommandType.TRANSFER)
+
+
+
+        if (job.Command == "TRANSFER")
         {
             await HandleTransfer(job);
             return;
         }
 
-        if (job.Command == CommandType.STOP)
+        if (job.Command == "STOP")
         {
             await HandleStop(job);
             return;
         }
 
-        Console.WriteLine($"未対応Command : {job.Command}");
+
 
     }
 

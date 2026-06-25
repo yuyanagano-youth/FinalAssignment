@@ -39,7 +39,7 @@ public class NotificationService
             await _apiclient.PostAsync<object>(
                 "/api/stub/equipment/online",
                 request);
-            Console.WriteLine($"ONLINE通知 : {stockerId}");
+            //Console.WriteLine($"ONLINE通知 : {stockerId}");
 
             Console.WriteLine("オンライン通知送信");
         }
@@ -77,7 +77,7 @@ public class NotificationService
                 "/api/stub/equipment/started",
                 request);
 
-            Console.WriteLine($"\nRUNNING通知 : {job.JobId}");
+            //Console.WriteLine($"\nRUNNING通知 : {job.JobId}");
 
             Console.WriteLine($"RUNNING通知送信 JobId={job.JobId}");
 
@@ -113,7 +113,7 @@ public class NotificationService
                 "/api/stub/equipment/completed",
                 request);
 
-            Console.WriteLine($"COMPLETED通知 : {job.JobId}");
+            //Console.WriteLine($"COMPLETED通知 : {job.JobId}");
 
             Console.WriteLine($"COMPLETED通知送信 JobId={job.JobId}");
         }
@@ -122,38 +122,4 @@ public class NotificationService
             Console.WriteLine($"E-45 COMPLETED通知失敗:{ex.Message}");
         }
     }
-
-    //// JOB中断通知送信
-    //public async Task NotifyAbortedAsync(string stockerId,string jobId)
-    //{
-    //    // オフライン中は通知しない
-    //    if(AppState.ConnectionStatus != ConnectionStatus.ONLINE)
-    //    {
-    //        return;
-    //    }
-
-    //    try
-    //    { 
-    //        // ABORTED通知リクエスト作成
-    //        JobStatusRequest? response = new()
-    //        {
-    //            StockerId = stockerId,
-    //            JobId = jobId,
-    //            JobStatus = "ABORTED"
-    //        };
-
-    //        // サーバーへ中断通知送信
-    //        //await _apiclient.PostAsync<object>(
-    //        //    "/api/stub/equipment/aborted",
-    //        //    request);
-
-    //        Console.WriteLine($"ABORTED通知 : {jobId}");
-
-    //        Console.WriteLine($"ABORTED通知送信 JobId={jobId}");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Console.WriteLine($"ABORTED通知失敗:{ex.Message}");
-    //    }
-    //}
 }

@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
     <!-- 自前のApp Shell用スタイル -->
-    <link rel="stylesheet" href="~/css/site.css"/>
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
 
@@ -99,14 +99,35 @@
 
     <script>
         // ===== PWA: Service Worker 登録 =====
-        // オフライン時でもApp Shell自体は表示できるようにキャッシュ制御する。
-        // if ('serviceWorker' in navigator) {
-        // window.addEventListener('load', () => {
-        // navigator.serviceWorker.register('/sw.js')
-        // .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
-        // .catch(err => console.error('[PWA] Service Worker registration failed:', err));
-        // });
-        // }
+        // 【開発中は一時的に無効化】
+        // fetchハンドラがキャッシュ未整合時に正しいResponseを返せず、
+        // CSS/JS読み込みが不安定になる問題があるため、開発完了まで無効化する。
+        // 本番リリース前にコメントを解除すること。
+        /*
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+        .catch(err => console.error('[PWA] Service Worker registration failed:', err));
+        });
+        }
+        */
+
+        // 【開発用クリーンアップ】
+        // 以前のテストで登録された古いService Workerが残っていると、
+        // ナビゲーション時に古いキャッシュ済みHTML/JSが返され、最新の変更が
+        // 反映されない（ハードリフレッシュでのみ直る）問題が起きるため、
+        // 開発中は毎回チェックして自動的にアンインストールする。
+        // 本番リリース時はこのブロックも削除し、上の登録コードを有効化すること。
+        if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => {
+        reg.unregister();
+        console.log('[DEV] 古いService Workerをアンインストールしました:', reg.scope);
+        });
+        });
+        }
     </script>
 </body>
+
 </html>

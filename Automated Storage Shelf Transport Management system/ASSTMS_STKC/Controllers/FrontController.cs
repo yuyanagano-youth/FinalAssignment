@@ -145,37 +145,53 @@ namespace ASSTMS_STKC.Controllers
         }
 
         //ログ取得
+        //[HttpGet("logs/recent")]
+        //public async Task<IActionResult> GetLogListAsync([FromQuery] string? stockerId)
+        //{
+        //    //var list = new List<ShelfStockIndexRes>
+        //    //{
+        //    //    new ShelfStockIndexRes("R001", "C001", DateTime.Now),
+        //    //    new ShelfStockIndexRes("R002", "C002", DateTime.Now)
+        //    //};
+
+        //    //return Ok(list);
+
+        //    List<DeviceLog> LogList;
+
+        //    if (string.IsNullOrEmpty(stockerId))
+        //    {
+        //        return BadRequest();
+        //    }
+        //    else
+        //    {
+        //        // stockerId が指定された場合（フィルター検索）
+        //        LogList = await _logRepository.GetAllLogs(stockerId);
+        //    }
+
+        //    // 通信用の record（LogIndexRes）のリストに詰め替える
+        //    List<LogIndexRes> responseList = LogList.Select(dto => new LogIndexRes(
+        //        dto.Timestamp,
+        //        dto.Level,
+        //        dto.Message ?? string.Empty
+        //    )).ToList();
+
+        //    // 200 OK で返却
+        //    return Ok(responseList);
+        //}
+
+
         [HttpGet("logs/recent")]
         public async Task<IActionResult> GetLogListAsync([FromQuery] string? stockerId)
         {
-            //var list = new List<ShelfStockIndexRes>
-            //{
-            //    new ShelfStockIndexRes("R001", "C001", DateTime.Now),
-            //    new ShelfStockIndexRes("R002", "C002", DateTime.Now)
-            //};
+            // stockerId が null/空の場合は「全件取得」として扱う（GetAllLogsのSQLが対応済み）
+            List<DeviceLog> LogList = await _logRepository.GetAllLogs(stockerId);
 
-            //return Ok(list);
-
-            List<DeviceLog> LogList;
-
-            if (string.IsNullOrEmpty(stockerId))
-            {
-                return BadRequest();
-            }
-            else
-            {
-                // stockerId が指定された場合（フィルター検索）
-                LogList = await _logRepository.GetAllLogs(stockerId);
-            }
-
-            // 通信用の record（LogIndexRes）のリストに詰め替える
             List<LogIndexRes> responseList = LogList.Select(dto => new LogIndexRes(
                 dto.Timestamp,
                 dto.Level,
                 dto.Message ?? string.Empty
             )).ToList();
 
-            // 200 OK で返却
             return Ok(responseList);
         }
 

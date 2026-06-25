@@ -126,6 +126,64 @@ html, body {
     margin-bottom: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
+/* Card Container */
+/*.amhs-card {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    max-width: 300px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}*/
+
+    /* Card Hover Interaction */
+    /*.amhs-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }*/
+
+/* Label Styling */
+/*.form-label-sm {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 6px;
+    transition: color 0.2s ease;
+}*/
+
+/* Label changes color when dropdown is focused */
+/*.amhs-card:focus-within .form-label-sm {
+    color: #2563eb;
+}*/
+
+/* Interactive Dropdown Select */
+/*.form-select {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    color: #1f2937;
+    background-color: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}*/
+
+    /* Dropdown Hover State */
+    /*.form-select:hover {
+        background-color: #f3f4f6;
+        border-color: #cbd5e1;
+    }*/
+
+    /* Dropdown Focus State (Active Interaction) */
+    /*.form-select:focus {
+        background-color: #ffffff;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    }*/
+
 
 /* ===== ステータスバッジ：接続状態 ===== */
 .badge-online {

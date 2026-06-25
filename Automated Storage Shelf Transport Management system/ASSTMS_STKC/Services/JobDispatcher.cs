@@ -56,7 +56,7 @@ namespace ASSTMS_STKC.Services
                                 Destination: job.DestLocation   // DestLocation ➔ Destination
                             );
 
-                        // 3. 最上位の送信リクエスト record に包む
+                        //3. 最上位の送信リクエスト record に包む
                         var requestPayload = new OperationInstructionsReq(
                             HasPendingJob: true,
                             Job: jobRecord

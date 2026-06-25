@@ -6,6 +6,6 @@ namespace stocker.Enums;
 
 public enum ConnectionStatus
 {
-    OFFLINE = 0,
-    ONLINE = 1
+    OFFLINE,
+    ONLINE
 }
