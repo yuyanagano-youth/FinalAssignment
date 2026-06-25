@@ -56,13 +56,13 @@ namespace ASSTMS_STKC.Services
                                 Destination: job.DestLocation   
                             );
 
-                        // 3. 最上位の送信リクエスト record に包む
+                        // 2. 最上位の送信リクエスト record に包む
                         var requestPayload = new OperationInstructionsReq(
                             HasPendingJob: true,
                             Job: jobRecord
                         );
 
-                        // 2. スタブへPOST送信
+                        // 3. スタブへPOST送信
                         string stubUrl = "http://172.16.7.19:5029/";
                         var response = await _httpClient.PostAsJsonAsync(stubUrl, requestPayload);
 
