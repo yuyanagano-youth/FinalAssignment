@@ -30,7 +30,7 @@ namespace ASSTMS_STKC.SharedModels
     public record PollingReq(string StockerId, string CurrentOperationState);
     //定期ポーリング(レスポンス)
     public record Job(string? JobId, string? Command, string? CarrierId, string? Source, string? Destination);
-    public record PollingRes(bool HasPendingJob, Job Job);
+    public record PollingRes(bool HasPendingJob, Job? Job);
 
     //動作開始報告(リクエスト)
     public record JobStartReportReq(string? StockerId, string? JobStatus, string? CurrentOperationState, Job Job);
@@ -46,7 +46,7 @@ namespace ASSTMS_STKC.SharedModels
     public record OperationInstructionsFailureRes(string StockerId, string JobId, string JobStatus);
 
     //停止完了(レスポンス)
-    public record StopCompletedRes(string StockerId, string JobId, string JobStatus, string CurrentOperationState);
+    public record StopCompletedRes(string StockerId, string? JobId, string? JobStatus, string? CurrentOperationState);
     //既に停止中(レスポンス)
     public record AlreadyStoppedRes(string StockerId);
 

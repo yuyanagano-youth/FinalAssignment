@@ -2,7 +2,10 @@
 using ASSTMS_STKC.Services;
 using ASSTMS_STKC.SharedModels;
 using ASSTMS_STKC.SharedModels.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
+using System.Net;
 using System.Text.Json;
 
 namespace ASSTMS_STKC.Controllers
@@ -17,6 +20,8 @@ namespace ASSTMS_STKC.Controllers
         private readonly JobRepository _jobRepository;
         private readonly JobValidator _jobValidator;
         private readonly StubCommandService _stubCommandService;
+        private readonly ILogger<FrontController> _logger;
+
 
         public FrontController(
             StockersRepository stockersRepository,
@@ -24,7 +29,8 @@ namespace ASSTMS_STKC.Controllers
             LogRepository logRepository,
             JobRepository jobRepository,
             JobValidator jobValidator,
-            StubCommandService stubCommandService
+            StubCommandService stubCommandService,
+            ILogger<FrontController> logger
             )
         {
             _stockersRepository = stockersRepository;
@@ -33,6 +39,7 @@ namespace ASSTMS_STKC.Controllers
             _jobRepository = jobRepository;
             _jobValidator = jobValidator;
             _stubCommandService = stubCommandService;
+            _logger = logger;
         }
 
         //保管棚状態一覧取得
@@ -178,12 +185,6 @@ namespace ASSTMS_STKC.Controllers
         {
             Console.WriteLine($"[フロント通信受信] 搬送ジョブ送信要求を受け取りました");
 
-            //if (req == null || string.IsNullOrEmpty(req.Command) || string.IsNullOrEmpty(req.StockerId))
-            //{
-            //    return BadRequest(new { Message = "必要なデータが不足しています。" });
-            //}
-
-
             if (req.Command == "TRANSFER")
             {
                 var (isValid, errorMessage) = await _jobValidator.IsValidAsync(req);
@@ -226,11 +227,60 @@ namespace ASSTMS_STKC.Controllers
             else if (req.Command == "STOP")
             {
 
-                bool success = true;
+               JobInfo travelingJob = await _stockersRepository.GetTravelingJobsAsync();
 
-                if (success == true)
+                if (travelingJob == null)
                 {
-                    bool result = await _stubCommandService.SendStopCommandAsync(req.StockerId);
+                    return BadRequest("搬送中ジョブが存在しません。");
+                }
+
+                var jobRecord = new Job(
+                    JobId: travelingJob.JobId,
+                    Command: req.Command,
+                    CarrierId: travelingJob.CarrierId,
+                    Source: travelingJob.SourceLocation,
+                    Destination: travelingJob.DestLocation
+                    );
+
+                var requestPayload = new OperationInstructionsReq(
+                    HasPendingJob: true,
+                    Job: jobRecord
+                );
+
+                if (travelingJob != null)
+                {
+                    HttpResponseMessage response = await _stubCommandService.SendStopCommandAsync(requestPayload);
+
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        StopCompletedRes result = await response.Content.ReadFromJsonAsync<StopCompletedRes>();
+
+                        if (result == null)
+                        {
+                            _logger.LogError("JSON変換失敗");
+                            return BadRequest();
+                        }
+
+                        if (string.IsNullOrEmpty(result.JobId) ||
+                            string.IsNullOrEmpty(result.JobStatus)||
+                            string.IsNullOrEmpty(result.StockerId)||
+                            string.IsNullOrEmpty(result.CurrentOperationState))
+                        {
+                            _logger.LogError("レスポンス項目不足");
+                            return BadRequest();
+                        }
+
+
+                        await _jobRepository.UpdateJobStatus(result.JobId,result.JobStatus);
+                        await _stockersRepository.UpdateOperationState(result.StockerId, result.CurrentOperationState);
+                    } 
+                    else
+                    {
+                        string error = await response.Content.ReadAsStringAsync();
+
+                        _logger.LogError($"APIエラー: {error}");
+                    }
 
                     return Ok();
                 }

@@ -48,25 +48,25 @@ namespace ASSTMS_STKC.Services
                     {
                         Console.WriteLine($"[JOB送信] 条件一致のJOBを発見しました。 (JobID: {job.JobId})");
 
-                        //var jobRecord = new Job(
-                        //        JobId: job.JobId,
-                        //        Command: "TRANSFER", // 必要に応じて jobInfo.Something からマッピングしてください
-                        //        CarrierId: job.CarrierId,
-                        //        Source: job.SourceLocation,      // SourceLocation ➔ Source
-                        //        Destination: job.DestLocation   // DestLocation ➔ Destination
-                        //    );
+                        var jobRecord = new Job(
+                                JobId: job.JobId,
+                                Command: "TRANSFER", // 必要に応じて jobInfo.Something からマッピングしてください
+                                CarrierId: job.CarrierId,
+                                Source: job.SourceLocation,      // SourceLocation ➔ Source
+                                Destination: job.DestLocation   // DestLocation ➔ Destination
+                            );
 
                         // 3. 最上位の送信リクエスト record に包む
                         var requestPayload = new OperationInstructionsReq(
                             HasPendingJob: true,
-                            //Job: jobRecord
-                            job
+                            Job: jobRecord
+                            //job
                         );
 
                         // 2. スタブへPOST送信
                         // ※ポート番号や送信データの形式（request）はスタブの仕様に合わせてください
-                        string stubUrl = "http://localhost:5029/";
-                        var response = await _httpClient.PostAsJsonAsync(stubUrl, job);
+                        string stubUrl = "http://172.16.7.19:5029/";
+                        var response = await _httpClient.PostAsJsonAsync(stubUrl, requestPayload);
 
                         if (response.IsSuccessStatusCode)
                         {

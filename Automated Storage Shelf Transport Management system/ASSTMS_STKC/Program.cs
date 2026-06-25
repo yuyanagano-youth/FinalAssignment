@@ -1,5 +1,6 @@
 using ASSTMS_STKC.Data;
 using ASSTMS_STKC.Data.Repositories;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,9 @@ builder.Services.AddScoped<ASSTMS_STKC.Services.JobValidator>();
 builder.Services.AddScoped<ASSTMS_STKC.Services.StubCommandService>();
 builder.Services.AddHostedService<ASSTMS_STKC.Services.StockerTimeoutService>();
 builder.Services.AddHostedService<ASSTMS_STKC.Services.JobDispatcher>();
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
+
 
 
 

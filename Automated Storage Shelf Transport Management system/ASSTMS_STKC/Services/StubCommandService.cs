@@ -1,6 +1,8 @@
 ﻿using ASSTMS_STKC.Data;
+using ASSTMS_STKC.Data.Repositories;
 using ASSTMS_STKC.SharedModels;
 using ASSTMS_STKC.SharedModels.Models;
+using System.Net;
 
 namespace ASSTMS_STKC.Services
 {
@@ -13,24 +15,13 @@ namespace ASSTMS_STKC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<bool> SendStopCommandAsync(string stockerId)
+        public async Task<HttpResponseMessage> SendStopCommandAsync(OperationInstructionsReq request)
         {
-            var request = new OperationInstructionsReq(
-                    true,
-                    new Job(
-                    "JOB1001",
-                    "STOP",
-                    "CST-1001",
-                    "IN_PORT",
-                    "SHELF_A1"
-                    )
-                    );
-
             HttpResponseMessage response =
-                //await _httpClient.PostAsJsonAsync($"http://172.16.7.19:5029/",request);
-                await _httpClient.PostAsJsonAsync($"http://localhost:5029/", request);
+                await _httpClient.PostAsJsonAsync($"http://172.16.7.19:5029/",request);
+            //await _httpClient.PostAsJsonAsync($"http://localhost:5029/", request);
 
-            return response.IsSuccessStatusCode;
+            return response;
         }
     }
 }

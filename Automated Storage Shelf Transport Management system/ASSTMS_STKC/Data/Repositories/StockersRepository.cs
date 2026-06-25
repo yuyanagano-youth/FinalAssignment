@@ -72,8 +72,17 @@ namespace ASSTMS_STKC.Data.Repositories
         {
             //最終通信時刻が(現在時刻-設定時間)より前の時間のレコードを一括変更
             string sql = @"
+                -- 1. オフラインになるStockerIdでRUNNING状態のJOBがあればABORTEDにする
+                UPDATE j
+                SET j.JobStatus = 'ABORTED'
+                FROM Jobs j
+                INNER JOIN Stockers s ON j.StockerID = s.StockerID
+                WHERE j.JobStatus = 'RUNNING'
+                AND s.LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());
+
+                -- 2. タイムアウトしたStockerIdを一括でOFFLINEに変更
                 UPDATE Stockers
-                SET ConnectionStatus = 'OFFLINE'
+                SET ConnectionStatus = 'OFFLINE',OperationState = 'IDLE'
                 WHERE LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());";
 
             using (IDbConnection db = _context.CreateConnection())
@@ -115,6 +124,21 @@ namespace ASSTMS_STKC.Data.Repositories
             using (IDbConnection db = _context.CreateConnection())
             {
                 return await db.QueryAsync<JobInfo>(sql);
+            }
+        }
+
+
+        //7 STOPするJOBを取得
+        public async Task<JobInfo?> GetTravelingJobsAsync()
+        {
+            string sql = @"
+        SELECT j.* FROM Jobs j
+        INNER JOIN Stockers s ON j.StockerId = s.StockerId
+        WHERE j.JobStatus = 'RUNNING'";
+
+            using (IDbConnection db = _context.CreateConnection())
+            {
+                return await db.QueryFirstOrDefaultAsync<JobInfo>(sql);
             }
         }
     }
