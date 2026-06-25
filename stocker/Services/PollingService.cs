@@ -82,6 +82,7 @@ public class PollingService
                 CurrentOperationState = operationState
             };
 
+            Console.WriteLine("Polling開始");
             Console.WriteLine($"StockerId={request.StockerId}");
             Console.WriteLine($"CurrentOperationState={request.CurrentOperationState}");
 
