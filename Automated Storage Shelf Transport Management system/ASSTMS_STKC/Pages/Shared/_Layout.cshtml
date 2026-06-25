@@ -103,7 +103,7 @@
         // fetchハンドラがキャッシュ未整合時に正しいResponseを返せず、
         // CSS/JS読み込みが不安定になる問題があるため、開発完了まで無効化する。
         // 本番リリース前にコメントを解除すること。
-        /*
+        
         if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
@@ -111,7 +111,7 @@
         .catch(err => console.error('[PWA] Service Worker registration failed:', err));
         });
         }
-        */
+       
 
         // 【開発用クリーンアップ】
         // 以前のテストで登録された古いService Workerが残っていると、
@@ -119,14 +119,14 @@
         // 反映されない（ハードリフレッシュでのみ直る）問題が起きるため、
         // 開発中は毎回チェックして自動的にアンインストールする。
         // 本番リリース時はこのブロックも削除し、上の登録コードを有効化すること。
-        if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(reg => {
-        reg.unregister();
-        console.log('[DEV] 古いService Workerをアンインストールしました:', reg.scope);
-        });
-        });
-        }
+        // if ('serviceWorker' in navigator) {
+        // navigator.serviceWorker.getRegistrations().then(regs => {
+        // regs.forEach(reg => {
+        // reg.unregister();
+        // console.log('[DEV] 古いService Workerをアンインストールしました:', reg.scope);
+        // });
+        // });
+        // }
     </script>
 </body>
 

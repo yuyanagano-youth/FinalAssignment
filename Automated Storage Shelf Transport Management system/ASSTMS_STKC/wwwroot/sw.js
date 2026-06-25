@@ -60,8 +60,7 @@ self.addEventListener("fetch", (event) => {
         return; // ブラウザの標準fetchに委ねる
     }
 
-    event.respondWith(
-        caches.match(event.request).then((cached) => {
+    event.respondWith(        caches.match(event.request).then((cached) => {
             if (cached) return cached;
             return fetch(event.request).catch(() =>
                 // オフライン時、ナビゲーション要求にはApp Shell(トップ)を返す
@@ -70,3 +69,4 @@ self.addEventListener("fetch", (event) => {
         })
     );
 });
+

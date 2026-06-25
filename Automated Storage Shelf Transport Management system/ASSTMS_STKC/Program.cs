@@ -2,6 +2,18 @@ using ASSTMS_STKC.Data;
 using ASSTMS_STKC.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+//For generation and trust certificate  ,Kestrel in ASP.NET Core app:
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenAnyIP(7196, listenOptions =>
+//    {
+//        listenOptions.UseHttps("C:\\Windows\\System32\\10.189.18.126.p12", "changeit");
+//    });
+//});
+
+
+
+
 
 // Add services to the container.
 builder.Services.AddRazorPages();
