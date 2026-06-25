@@ -38,7 +38,7 @@ namespace ASSTMS_STKC.Services
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    // 各種リポジトリの取得（実際のクラス名に書き換えてください）
+                    // 各種リポジトリの取得
                     var jobRepo = scope.ServiceProvider.GetRequiredService<StockersRepository>();
 
                     // 1. 条件の揃ったJOBをDBから取得
@@ -50,21 +50,19 @@ namespace ASSTMS_STKC.Services
 
                         var jobRecord = new Job(
                                 JobId: job.JobId,
-                                Command: "TRANSFER", // 必要に応じて jobInfo.Something からマッピングしてください
+                                Command: "TRANSFER", 
                                 CarrierId: job.CarrierId,
-                                Source: job.SourceLocation,      // SourceLocation ➔ Source
-                                Destination: job.DestLocation   // DestLocation ➔ Destination
+                                Source: job.SourceLocation,      
+                                Destination: job.DestLocation   
                             );
 
-                        //3. 最上位の送信リクエスト record に包む
+                        // 3. 最上位の送信リクエスト record に包む
                         var requestPayload = new OperationInstructionsReq(
                             HasPendingJob: true,
                             Job: jobRecord
-                            //job
                         );
 
                         // 2. スタブへPOST送信
-                        // ※ポート番号や送信データの形式（request）はスタブの仕様に合わせてください
                         string stubUrl = "http://172.16.7.19:5029/";
                         var response = await _httpClient.PostAsJsonAsync(stubUrl, requestPayload);
 
