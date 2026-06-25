@@ -7,6 +7,7 @@
 (() => {
     const logList = document.getElementById("logList");
     const btnRefresh = document.getElementById("btnRefreshLogs");
+    const stockerSelect = document.getElementById("historyStockerSelect");
 
     function escapeHtml(str) {
         return String(str).replace(/[&<>"']/g, (c) => ({
@@ -28,6 +29,30 @@
         return d.toLocaleString("ja-JP");
     }
 
+    /**
+     * ドロップダウンを構築する。先頭に「すべて(ALL)」を追加し、
+     * 続けて status==="Active" のストッカーを一覧表示する。
+     */
+    async function loadStockerOptions() {
+        const res = await AmhsCore.getStockers();
+        if (!res.ok) return;
+
+        const activeOnly = AmhsCore.filterActiveStockers(res.data || []);
+        const currentSelection = stockerSelect.value;
+
+        const allOption = `<option value="ALL">すべて (ALL)</option>`;
+        const stockerOptions = activeOnly.map(s =>
+            `<option value="${escapeHtml(s.stockerId)}">${escapeHtml(s.stockerName)} (${escapeHtml(s.stockerId)})</option>`
+        ).join("");
+
+        stockerSelect.innerHTML = allOption + stockerOptions;
+
+        // 直前の選択を保持（無ければ既定で "ALL" のまま）
+        if (currentSelection && [...stockerSelect.options].some(o => o.value === currentSelection)) {
+            stockerSelect.value = currentSelection;
+        }
+    }
+
     function renderLogs(logs) {
         logList.innerHTML = logs.map(l => `
             <div class="amhs-card">
@@ -41,8 +66,11 @@
     }
 
     async function loadLogs() {
-        // History画面はストッカー指定なし＝全件から最新10件を取得する想定
-        const res = await AmhsCore.getRecentLogs();
+        const selected = stockerSelect.value;
+        // "ALL" のときは stockerId を送らない（バックエンドのSQLが NULL=全件 を許容するため）
+        const stockerId = selected === "ALL" ? null : selected;
+
+        const res = await AmhsCore.getRecentLogs(stockerId);
         if (!res.ok) {
             logList.innerHTML = `<p class="text-danger text-center mt-4">状態取得失敗</p>`; // UI-009
             return;
@@ -51,5 +79,9 @@
     }
 
     btnRefresh.addEventListener("click", loadLogs);
-    document.addEventListener("DOMContentLoaded", loadLogs);
+    stockerSelect.addEventListener("change", loadLogs);
+    document.addEventListener("DOMContentLoaded", async () => {
+        await loadStockerOptions();
+        await loadLogs();
+    });
 })();
