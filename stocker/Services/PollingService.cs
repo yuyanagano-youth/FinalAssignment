@@ -1,15 +1,18 @@
-﻿using System;
+﻿using NLog;
+using stocker.Client;
+using stocker.Enums;
+using stocker.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using stocker.Client;
-using stocker.Models;
-using stocker.Enums;
 
 namespace stocker.Services;
 
 
 public class PollingService
 {
+    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
     // API通信を行うクライアント
     private readonly ApiClient _apiClient;
 
@@ -91,21 +94,36 @@ public class PollingService
                await _apiClient.PostAsync<PollingRequest, PollingResponse>("http://172.16.7.6:5028/api/stub/equipment/polling", request);
 
             // レスポンスなし
-            if (response == null) { Console.WriteLine( "PollingResponseがnull"); return null; }
+            if (response == null) 
+            {
+                logger.Warn("PollingResponseがnull");
+                Console.WriteLine( "PollingResponseがnull");
+                return null; 
+            }
             // JOBなし
-            if (!response.HasPendingJob) { Console.WriteLine( "実行待ちJOBなし"); return response; } 
+            if (!response.HasPendingJob)
+            {
+                logger.Info("実行待ちJOBなし");
+                Console.WriteLine( "実行待ちJOBなし");
+                return response; 
+            } 
             // JOB情報なし
-            if (response.Job == null) { Console.WriteLine( "JOB情報が取得できません"); return response; }
+            if (response.Job == null) 
+            {
+                logger.Warn("JOB情報が取得できません");
+                Console.WriteLine( "JOB情報が取得できません");
+                return response;
+            }
 
-            Console.WriteLine("Polling開始");
-            //Console.WriteLine( $"JOB受信 : {response.Job.JobId}");
-            //Console.WriteLine( $"Command : {response.Job.Command}");
             // CommandDispatcherへ渡す
-            await _dispatcher.Dispatch( response.Job); return response;
+            await _dispatcher.Dispatch( response.Job);
+            
+            return response;
   
         }
         catch (Exception ex)
         {
+            logger.Error(ex, "Polling処理で例外発生");
             // 通信エラーや予期しない例外をログ出力
             Console.WriteLine(ex.Message);
             return null;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.Http.HttpResults;
+using NLog;
 using stocker.Enums;
 using stocker.Models;
 using stocker.Services;
@@ -14,6 +15,8 @@ namespace stocker.Services;
 /// </summary>
 public class CommandListener
 {
+    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
     // HTTP受信用Listener
     private HttpListener? _listener;
 
@@ -40,6 +43,8 @@ public class CommandListener
             _listener.Prefixes.Add("http://*:5029/");
 
             _listener.Start();
+
+
 
             Console.WriteLine("Listener開始");
 

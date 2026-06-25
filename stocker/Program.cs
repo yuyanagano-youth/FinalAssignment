@@ -2,12 +2,17 @@
 using stocker.Enums;
 using stocker.Models;
 using stocker.Services;
+using System;
+using NLog;
+
 
 namespace stocker;
 
 public class Program
 {
-    static async Task Main(string[] args)
+    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+    public static async Task Main(string[] args)
     {
         Console.WriteLine("アプリ開始");
 
@@ -82,9 +87,11 @@ public class Program
         }
         catch (Exception ex)
         {
+            logger.Error(ex,"予期しないエラー");
             Console.WriteLine($"エラー : {ex.Message}");
         }
 
+        logger.Info("アプリ終了");
         Console.WriteLine("アプリ終了");
     }
 
