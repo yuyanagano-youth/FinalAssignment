@@ -61,9 +61,9 @@ namespace ASSTMS_STKC.Services
                     return (false, Message);
                 }
 
-                var isShelfEmpty = await _shelfRepository.IsShelfEmpty(req.Destination);
+                var isShelfEmpty = await _shelfRepository.IsShelfEmpty(req.Destination,req.StockerId);
 
-                if (isShelfEmpty)
+                if (!isShelfEmpty)
                 {
                     Message = "指定された棚には既に在庫が存在します";
                     return (false, Message);

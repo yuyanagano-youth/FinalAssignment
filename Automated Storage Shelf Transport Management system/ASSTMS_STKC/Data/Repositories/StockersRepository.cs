@@ -68,29 +68,65 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 4　一定時間通信がない保管棚をオフラインに変更 (UPDATE)
-        public async Task<int> TimeoutOfflineStockers(int timeoutSeconds)
+        public async Task<List<string>> TimeoutOfflineStockers(int timeoutSeconds)
         {
             //最終通信時刻が(現在時刻-設定時間)より前の時間のレコードを一括変更
+            //string sql = @"
+            //    -- 1. オフラインになるStockerIdでRUNNING状態のJOBがあればABORTEDにする
+            //    UPDATE j
+            //    SET j.JobStatus = 'ABORTED'
+            //    FROM Jobs j
+            //    INNER JOIN Stockers s ON j.StockerID = s.StockerID
+            //    WHERE j.JobStatus = 'RUNNING'
+            //    AND s.LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());
+
+            //    -- 2. タイムアウトしたStockerIdを一括でOFFLINEに変更
+            //    UPDATE Stockers
+            //    SET ConnectionStatus = 'OFFLINE',OperationState = 'IDLE'
+            //    WHERE LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());";
+
+            //using (IDbConnection db = _context.CreateConnection())
+            //{
+            //    return db.Execute(sql, new
+            //    {
+            //        Timeout = timeoutSeconds
+            //    });
+            //}
             string sql = @"
-                -- 1. オフラインになるStockerIdでRUNNING状態のJOBがあればABORTEDにする
+                DECLARE @OfflineStockers TABLE (StockerId NVARCHAR(50));
+
+                INSERT INTO @OfflineStockers
+                OUTPUT inserted.StockerId
+                SELECT StockerId
+                FROM Stockers
+                WHERE LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE())
+                AND ConnectionStatus <> 'OFFLINE';
+
                 UPDATE j
                 SET j.JobStatus = 'ABORTED'
                 FROM Jobs j
-                INNER JOIN Stockers s ON j.StockerID = s.StockerID
-                WHERE j.JobStatus = 'RUNNING'
-                AND s.LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());
+                INNER JOIN @OfflineStockers s
+                ON j.StockerID = s.StockerId
+                WHERE j.JobStatus = 'RUNNING';
 
-                -- 2. タイムアウトしたStockerIdを一括でOFFLINEに変更
-                UPDATE Stockers
-                SET ConnectionStatus = 'OFFLINE',OperationState = 'IDLE'
-                WHERE LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());";
+                UPDATE s
+                SET ConnectionStatus = 'OFFLINE',
+                OperationState = 'IDLE'
+                FROM Stockers s
+                INNER JOIN @OfflineStockers o
+                ON s.StockerId = o.StockerId;
+
+                SELECT StockerId FROM @OfflineStockers;
+                ";
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.Execute(sql, new
-                {
-                    Timeout = timeoutSeconds
-                });
+                var offlineStockers = (await db.QueryAsync<string>(
+                    sql,
+                    new { Timeout = timeoutSeconds }))
+                    .ToList();
+
+                return offlineStockers;
             }
         }
 

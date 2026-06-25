@@ -19,18 +19,21 @@ namespace ASSTMS_STKC.Controllers
         private readonly ShelfRepository _shelfRepository;
         private readonly LogRepository _logRepository;
         private readonly JobRepository _jobRepository;
+        private readonly ILogger _logger;
 
 
         public StubController(
             StockersRepository stockersRepository,
             ShelfRepository shelfRepository,
             LogRepository logRepository,
-            JobRepository jobRepository)
+            JobRepository jobRepository,
+            ILogger<StubController> logger)
         {
             _stockersRepository = stockersRepository;
             _shelfRepository = shelfRepository;
             _logRepository = logRepository;
             _jobRepository = jobRepository;
+            _logger = logger;
         }
 
 
@@ -48,13 +51,15 @@ namespace ASSTMS_STKC.Controllers
                 }
 
                 int rows = await _stockersRepository.UpdateOnlineStatus(req.StockerId, req.ConnectionStatus);
+                _logger.LogInformation($"[STUB] オンライン移行");
+                await _logRepository.InsertLog(req.StockerId, "INFO", "オンライン移行");
 
                 return Ok();
             }
 
             catch (Exception ex)
             {
-                //_logger.Error(ex);
+                _logger.LogError(ex, $"[STUB] 不明なエラー {ex.Message}");
 
                 return StatusCode(500, new
                 {
@@ -77,18 +82,18 @@ namespace ASSTMS_STKC.Controllers
                     return BadRequest(new { Message = "JSONデータの変換に失敗しました。" });
                 }
 
-                //string? Source, string? Destination
-                //更新対象が存在しない場合の処理を追加
                 int stockerRows = await _stockersRepository.UpdateOperationState(req.StockerId, req.CurrentOperationState);
                 int jobRows = await _jobRepository.UpdateJobStatus(req.Job.JobId, req.JobStatus);
 
+                _logger.LogInformation($"[STUB] 搬送開始　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
+                await _logRepository.InsertLog(req.StockerId, "INFO", $"搬送開始　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
 
                 return Ok();
             }
 
             catch (Exception ex)
             {
-                //_logger.Error(ex);
+                _logger.LogError(ex, $"[STUB] 不明なエラー {ex.Message}");
 
                 return StatusCode(500, new
                 {
@@ -115,6 +120,9 @@ namespace ASSTMS_STKC.Controllers
                 int jobRows = await _jobRepository.UpdateJobStatus(req.Job.JobId, req.JobStatus);
                 int insertRow = await _shelfRepository.InsertStock(req.Job.Destination, req.Job.CarrierId);
                 int deleteRow = await _shelfRepository.DeleteStockByShelfId(req.Job.Source);
+
+                _logger.LogInformation($"[STUB] 搬送完了　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
+                await _logRepository.InsertLog(req.StockerId, "INFO", $"搬送完了　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
 
                 return Ok();
             }

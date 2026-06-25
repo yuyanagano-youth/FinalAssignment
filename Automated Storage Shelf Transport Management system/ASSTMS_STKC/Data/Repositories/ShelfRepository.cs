@@ -114,17 +114,18 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         //7. 指定棚が空いてるか判定 (SELECT)
-        public async Task<bool> IsShelfEmpty(string shelfId)
+        public async Task<bool> IsShelfEmpty(string shelfId, string stockerId )
         {
             string sql = @"
-                SELECT CarrierId
+                SELECT COUNT(1)
                 FROM Shelves
                 WHERE ShelfName = @ShelfName
-                AND CarrierId = null";
+                AND StockerID = @StockerId
+                AND CarrierId IS NULL";
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.ExecuteScalar<int>(sql, new { ShelfName = shelfId}) > 0;
+                return db.ExecuteScalar<int>(sql, new { ShelfName = shelfId , StockerID = stockerId}) > 0;
             }
 
         }

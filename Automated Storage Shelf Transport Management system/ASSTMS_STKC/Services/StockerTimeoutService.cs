@@ -11,19 +11,19 @@ namespace ASSTMS_STKC.Services
     public class StockerTimeoutService : IHostedService, IDisposable
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<StockerTimeoutService> _logger;
         private Timer? _timer;
 
         // コンストラクタでサービスプロバイダーだけを受け取る
-        public StockerTimeoutService(IServiceProvider serviceProvider)
+        public StockerTimeoutService(IServiceProvider serviceProvider, ILogger<StockerTimeoutService> logger)
         {
             _serviceProvider = serviceProvider;
+            _logger = logger;
         }
 
         // サーバー起動時に自動で呼び出される
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine("StockerTimeoutService (DB監視) が起動しました。");
-
             // 5秒ごとに CheckTimeoutFromDatabase を実行するタイマーをセット
             _timer = new Timer(CheckTimeoutFromDatabase, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
             return Task.CompletedTask;
@@ -42,17 +42,19 @@ namespace ASSTMS_STKC.Services
                     var stockerRepo = scope.ServiceProvider.GetRequiredService<StockersRepository>();
 
                     // 30秒通信がない保管棚を一括で 'OFFLINE' に更新する
-                    int updatedRows = await stockerRepo.TimeoutOfflineStockers(30);
+                    List<string> stockerIds = await stockerRepo.TimeoutOfflineStockers(30);
 
-                    if (updatedRows > 0)
+                    foreach (var id in stockerIds)
                     {
-                        Console.WriteLine($"[DB監視] タイムアウトした保管棚を {updatedRows} 件 'OFFLINE' に変更しました。");
+                        _logger.LogWarning("[STUB] ストッカーオフライン StockerId={StockerId}",id);
+                        var logRepo = scope.ServiceProvider.GetRequiredService<LogRepository>();
+                        await logRepo.InsertLog(id, "WARN", $"オフライン移行");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DB監視エラー] {ex.Message}");
+                Console.WriteLine($"{ex.Message}");
             }
         }
 
