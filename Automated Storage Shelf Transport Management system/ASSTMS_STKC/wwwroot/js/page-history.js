@@ -52,13 +52,13 @@
             stockerSelect.value = currentSelection;
         }
     }
-
+   
     function renderLogs(logs) {
         logList.innerHTML = logs.map(l => `
             <div class="amhs-card">
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="badge ${levelBadgeClass(l.level)}">${escapeHtml(l.level)}</span>
-                    <span class="small text-muted">${escapeHtml(formatTimestamp(l.timestamp))}</span>
+                    <span class="small text-muted">${escapeHtml(formatTimestamp(l.timeStamp))}</span>
                 </div>
                 <div class="mt-2">${escapeHtml(l.message)}</div>
             </div>
