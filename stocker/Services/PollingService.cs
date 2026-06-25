@@ -82,8 +82,8 @@ public class PollingService
                 CurrentOperationState = operationState
             };
 
-            Console.WriteLine($"StockerId={request.StockerId}");
-            Console.WriteLine($"CurrentOperationState={request.CurrentOperationState}");
+            //Console.WriteLine($"StockerId={request.StockerId}");
+            //Console.WriteLine($"CurrentOperationState={request.CurrentOperationState}");
 
 
             //API送信用リクエスト生成
@@ -95,9 +95,10 @@ public class PollingService
             // JOBなし
             if (!response.HasPendingJob) { Console.WriteLine( "実行待ちJOBなし"); return response; } 
             // JOB情報なし
-            if (response.Job == null) { Console.WriteLine( "JOB情報が取得できません"); return response; } 
+            if (response.Job == null) { Console.WriteLine( "JOB情報が取得できません"); return response; }
+
+            Console.WriteLine("Polling開始");
             Console.WriteLine( $"JOB受信 : {response.Job.JobId}");
-            
             Console.WriteLine( $"Command : {response.Job.Command}");
             // CommandDispatcherへ渡す
             await _dispatcher.Dispatch( response.Job); return response;

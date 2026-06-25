@@ -23,9 +23,9 @@ namespace stocker.Client
         {
             string json = JsonSerializer.Serialize(request);
 
-            // エラーの確認用
-            Console.WriteLine($"Request URL : {url}");
-            Console.WriteLine($"Request JSON: {json}");
+            //// エラーの確認用
+            //Console.WriteLine($"Request URL : {url}");
+            //Console.WriteLine($"Request JSON: {json}");
 
             StringContent? content = new StringContent(
                 json,
@@ -41,9 +41,9 @@ namespace stocker.Client
         {
             var json = JsonSerializer.Serialize(request);
 
-            // エラーの確認用
-            Console.WriteLine($"Request URL : {url}");
-            Console.WriteLine($"Request JSON: {json}");
+            //// エラーの確認用
+            //Console.WriteLine($"Request URL : {url}");
+            //Console.WriteLine($"Request JSON: {json}");
 
             StringContent? content = new(json, Encoding.UTF8, "application/json");
             
@@ -51,14 +51,18 @@ namespace stocker.Client
 
             var responseBody = await response.Content.ReadAsStringAsync();
 
-            // エラーの確認用
-            Console.WriteLine($"StatusCode : {(int)response.StatusCode}");
-            Console.WriteLine($"Response   : {responseBody}");
+            //// エラーの確認用
+            //Console.WriteLine($"StatusCode : {(int)response.StatusCode}");
+            //Console.WriteLine($"Response   : {responseBody}");
 
             response.EnsureSuccessStatusCode();
 
+            var option = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
             return JsonSerializer.Deserialize<TResponse>(
-                responseBody);
+                responseBody, option);
         }
     }
 }

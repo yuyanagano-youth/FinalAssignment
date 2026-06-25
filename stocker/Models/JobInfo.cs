@@ -9,7 +9,7 @@ namespace stocker.Models
     {
         public string? JobId { get; set; }
 
-        public CommandType Command { get; set;}
+        public string? Command { get; set;}
 
         public string? CarrierId { get; set;}
 
