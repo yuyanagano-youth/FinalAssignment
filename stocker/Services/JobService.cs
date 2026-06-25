@@ -61,7 +61,7 @@ public class JobService
 
         Console.WriteLine("搬送開始\n");
 
-        await Task.Delay(20000);
+        await Task.Delay(TimeSpan.FromSeconds(20),AppState.CancellationTokenSource!.Token);
 
         Console.WriteLine("搬送完了");
     }
@@ -82,7 +82,8 @@ public class JobService
 
         CancelCurrentJob();
 
-        //await _notificationService.NotifyRunningAsync("STK001", job);
+
+
         AppState.CurrentJobId = null;
         AppState.AcceptedJobId = null;
         AppState.OperationState = OperationState.IDLE;

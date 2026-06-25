@@ -4,6 +4,7 @@ using stocker.Enums;
 using stocker.Models;
 using stocker.Services;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace stocker.Services;
@@ -35,11 +36,6 @@ public class CommandListener
         {
             _listener = new HttpListener();
             // 受信町アドレス登録
-
-            //string prefix = "http//172.16.7.6:5028/api/stub/equipment/instruction";
-
-            //Console.WriteLine(prefix);
-
 
             _listener.Prefixes.Add("http://*:5029/");
 
@@ -176,8 +172,10 @@ public class CommandListener
                 //Console.WriteLine("Dispatch終了");
 
                 // JOB実行中の場合
-                // 新規JOBは受け付けずPENDING返却
-                if (AppState.OperationState == OperationState.RUNNING)
+                // STOP指示のみ受け付け新規JOBは受け付けずPENDING返却
+                if (request.Job.Command != null &&
+                    request.Job.Command != "STOP" &&
+                    AppState.OperationState == OperationState.RUNNING)
                 {
                     CommandResponse response = new()
                     {
@@ -190,7 +188,7 @@ public class CommandListener
 
                     context.Response.StatusCode = 200;
 
-                    using StreamWriter? writer = new (context.Response.OutputStream);
+                    using StreamWriter? writer = new(context.Response.OutputStream);
 
                     await writer.WriteAsync(responseJson);
 
@@ -200,30 +198,67 @@ public class CommandListener
                     continue;
                 }
 
+                //Console.WriteLine($"JobId={request.Job.JobId}"); ;
+                //Console.WriteLine($"Command={request.Job.Command}");
+
                 // IDLEならJOB実行依頼
                 await _dispatcher.Dispatch(request.Job);
 
 
                 // 実行受付成功レスポンス生成
-                CommandResponse successResponse = new()
-                {
-                    StockerId = "STK001",
-                    JobId = request.Job.JobId
-                };
+                CommandResponse successResponse;
 
-                string successJson =
-                    CreateResponse(successResponse);
+                if (request.Job.Command == "STOP")
+                {
+                    Console.WriteLine(request.Job.Command);
+                    successResponse = new()
+                    {
+                        StockerId = "STK001",
+                        JobId = request.Job.JobId,
+                        JobStatus = "ABORTED",
+                        CurrentOperationState = AppState.OperationState.ToString(),
+                    };
+
+                }
+                else
+                {
+                    successResponse = new()
+                    {
+                        StockerId = "STK001",
+                        JobId = request.Job.JobId,
+                    };
+                }
+
+                //string successJson =
+                //    CreateResponse(successResponse);
+
+                //Console.WriteLine(successJson);
+
+                //context.Response.StatusCode = 200;
+                //Console.WriteLine("1");
+                //using StreamWriter? successWriter =
+                //    new(context.Response.OutputStream);
+                //await successWriter.WriteAsync(successJson);
+                //context.Response.Close();
+
+                string successJson = CreateResponse(successResponse);
+
+                byte[] buffer = Encoding.UTF8.GetBytes(successJson);
 
                 context.Response.StatusCode = 200;
+                context.Response.ContentType = "application/json";
+                context.Response.ContentLength64 = buffer.Length;
 
-                using StreamWriter? successWriter =
-                    new(context.Response.OutputStream);
+                await context.Response.OutputStream.WriteAsync(
+                    buffer,
+                    0,
+                    buffer.Length);
 
-                await successWriter.WriteAsync(successJson);
+                await context.Response.OutputStream.FlushAsync();
 
                 context.Response.Close();
             }
-            catch(HttpListenerException)
+            catch (HttpListenerException)
             {
                 Console.WriteLine("Listener停止");
             }

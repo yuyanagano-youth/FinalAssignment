@@ -16,6 +16,9 @@ public class CommandDispatcher
 
     public async Task Dispatch(JobInfo job)
     {
+
+
+
         if (job.Command == "TRANSFER")
         {
             await HandleTransfer(job);
@@ -28,7 +31,7 @@ public class CommandDispatcher
             return;
         }
 
-        Console.WriteLine($"未対応Command : {job.Command}");
+
 
     }
 
