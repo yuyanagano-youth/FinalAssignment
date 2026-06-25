@@ -79,7 +79,8 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                 SELECT TOP 1 * 
                 FROM Jobs
-                ORDER BY ClosedAt ASC";
+                WHERE JobStatus = 'PENDING'
+                ORDER BY CreatedAt ASC";
 
             using (IDbConnection db = _context.CreateConnection())
             {
@@ -111,7 +112,7 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                DELETE FROM Jobs
                 WHERE JobID = @JobId
-                AND JobStatus = @JobStatus";
+                AND JobStatus <> @JobStatus";
 
             using (IDbConnection db = _context.CreateConnection())
             {

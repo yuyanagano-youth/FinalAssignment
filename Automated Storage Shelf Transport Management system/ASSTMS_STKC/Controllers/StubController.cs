@@ -150,17 +150,30 @@ namespace ASSTMS_STKC.Controllers
 
                 if (job == null)
                 {
-                    return Ok(new
-                    {
-                        hasJob = false
-                    });
+                    Console.WriteLine("未処理のJOBはありませんでした。");
+
+                    // 例：JOBがない状態のレスポンスを作って返す
+                    var emptyPayload = new PollingRes(
+                        HasPendingJob: false,
+                        Job: null
+                    );
+                    return Ok(emptyPayload);
                 }
 
-                return Ok(new
-                {
-                    hasJob = true,
-                    job
-                });
+                var jobRecord = new Job(
+                    JobId: job.JobId,
+                    Command: "TRANSFER",
+                    CarrierId: job.CarrierId,
+                    Source: job.SourceLocation,
+                    Destination: job.DestLocation
+                    );
+
+                var requestPayload = new PollingRes(
+                    HasPendingJob: true,
+                    Job: jobRecord
+                    );
+
+                return Ok(requestPayload);
             }
 
             catch (Exception ex)

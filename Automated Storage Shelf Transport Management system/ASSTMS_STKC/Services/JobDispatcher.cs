@@ -60,13 +60,13 @@ namespace ASSTMS_STKC.Services
                         var requestPayload = new OperationInstructionsReq(
                             HasPendingJob: true,
                             Job: jobRecord
-                           // job
+                            //job
                         );
 
                         // 2. スタブへPOST送信
                         // ※ポート番号や送信データの形式（request）はスタブの仕様に合わせてください
-                        string stubUrl = "http://localhost:5029/";
-                        var response = await _httpClient.PostAsJsonAsync(stubUrl, job);
+                        string stubUrl = "http://172.16.7.19:5029/";
+                        var response = await _httpClient.PostAsJsonAsync(stubUrl, requestPayload);
 
                         if (response.IsSuccessStatusCode)
                         {
