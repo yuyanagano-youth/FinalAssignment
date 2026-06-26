@@ -1,4 +1,4 @@
-﻿using NLog.Targets;
+﻿using NLog;
 using stocker.Client;
 using stocker.Enums;
 using stocker.Models;
@@ -15,7 +15,10 @@ namespace stocker.Services;
 
 public class NotificationService
 {
-    // API通信クライアント
+    // ログ出力用
+    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+    // API通信を行うクライアント
     private readonly ApiClient _apiclient;
 
     public NotificationService(ApiClient apiClient)
@@ -23,7 +26,10 @@ public class NotificationService
         _apiclient = apiClient;
     }
 
-    // オンライン通知送信処理
+    /// <summary>
+    /// オンライン通知をサーバーへ送信する
+    /// </summary>
+    /// <param name="stockerId">設備ID</param>
     public async Task SendOnlineAsync(string stockerId)
     {
         try
@@ -39,23 +45,28 @@ public class NotificationService
             await _apiclient.PostAsync<object>(
                 "/api/stub/equipment/online",
                 request);
-            //Console.WriteLine($"ONLINE通知 : {stockerId}");
 
             Console.WriteLine("オンライン通知送信");
+            logger.Info($"オンライン通知送信 StockerId = {stockerId}");
         }
         catch (Exception ex)
         {
-            // 通信失敗
+            // 通信エラー
             Console.WriteLine($"E-45 オンライン通知失敗:{ex.Message}");
+            logger.Error(ex, "E-45 オンライン通知失敗");
             throw;
         }
     }
 
 
-    // JOB開始通知送信
+    /// <summary>
+    /// JOB開始(RUNNING)をサーバーへ通知する
+    /// </summary>
+    /// <param name="stockerId">設備ID</param>
+    /// <param name="job">実行中JOB</param>
     public async Task NotifyRunningAsync(string stockerId,JobInfo job)
     {
-        // オフライン中は通知しない
+        // オフライン中は通知を送信しない
         if(AppState.ConnectionStatus != ConnectionStatus.ONLINE)
         {
             return;
@@ -72,27 +83,31 @@ public class NotificationService
                 Job = job
             };
 
-            // サーバーへ開始通知送信
+            // サーバーへRUNNING通知送信
             await _apiclient.PostAsync(
                 "/api/stub/equipment/started",
                 request);
 
-            //Console.WriteLine($"\nRUNNING通知 : {job.JobId}");
 
             Console.WriteLine($"RUNNING通知送信 JobId={job.JobId}");
+            logger.Info($"RUNNING通知送信 JobId = {job.JobId}");
 
         }
         catch (Exception ex)
         {
+            // 通信失敗
             Console.WriteLine($"E-45 RUNNING通知失敗:{ex.Message}");
+            logger.Error(ex, $"E-45 RUNNING通知失敗 JobId = {job.JobId}");
         }
     }
 
-    // JOB完了通知送信
+    /// <summary>
+    /// サーバーへJOB完了通知(COMPLETED)を送信する
+    /// </summary>
     public async Task NotifyCompletedAsync(string stockerId,JobInfo job)
     {
-        // オフライン中は通知しない
-        if(AppState.ConnectionStatus != ConnectionStatus.ONLINE)
+        // オフライン中はサーバーと通信できないため通知を送信しない
+        if (AppState.ConnectionStatus != ConnectionStatus.ONLINE)
         {
             return;
         }
@@ -116,10 +131,12 @@ public class NotificationService
             //Console.WriteLine($"COMPLETED通知 : {job.JobId}");
 
             Console.WriteLine($"COMPLETED通知送信 JobId={job.JobId}");
+            logger.Info($"COMPLETED通知送信 JobId={job.JobId}");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"E-45 COMPLETED通知失敗:{ex.Message}");
+            logger.Error(ex, $"E-45 COMPLETED通知失敗 JobId={job.JobId}");
         }
     }
 }

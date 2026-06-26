@@ -12,6 +12,9 @@ public class Program
 {
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>
+    /// アプリケーションのエントリーポイント
+    /// </summary>
     public static async Task Main(string[] args)
     {
         Console.WriteLine("アプリ開始");
@@ -43,13 +46,15 @@ public class Program
 
             var commandListener = new CommandListener(commandDispatcher);
 
-            // 初期設定
+            // アプリケーション状態を初期化
             onlineManager.Initialize();
 
+            // 操作メニュー表示
             Console.WriteLine();
             Console.WriteLine("1.オンライン / 2.オフライン");
             Console.Write("選択 : ");
 
+            // ユーザー入力を受け付ける
             while (true)
             {
                 string? input = Console.ReadLine();
@@ -58,27 +63,37 @@ public class Program
                 {
                     case "1":
 
+                        // オンライン化
                         await onlineManager.GoOnlineAsync("STK001");
 
+                        // HTTP Listener開始
                         await commandListener.StartListener();
 
                         break;
 
                     case "2":
 
+                        // HTTP Listener停止
                         commandListener.StopListener();
 
+                        // オフライン化
                         await onlineManager.GoOfflineAsync();
 
                         break;
 
                     case "0":
+
+                        // Listener停止
                         commandListener.StopListener();
 
+                        // オフライン化
                         await onlineManager.GoOfflineAsync();
+                        // アプリ終了
                         Console.WriteLine("アプリ終了");
+                        logger.Info("アプリ終了");
                         return;
 
+                        // メニュー以外が入力された
                     default:
                         Console.WriteLine("入力エラー");
                         break;
@@ -87,12 +102,11 @@ public class Program
         }
         catch (Exception ex)
         {
+            // 想定外エラー
             logger.Error(ex,"予期しないエラー");
             Console.WriteLine($"エラー : {ex.Message}");
         }
 
-        logger.Info("アプリ終了");
-        Console.WriteLine("アプリ終了");
     }
 
 }

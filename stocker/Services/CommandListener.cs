@@ -17,10 +17,10 @@ public class CommandListener
 {
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-    // HTTP受信用Listener
+    // HTTPリクエスト受信用Listener
     private HttpListener? _listener;
 
-    // JOB実行を振り分けるDispatcher
+    // 受信したコマンドを処理クラスへ振り分ける
     private readonly CommandDispatcher _dispatcher;
 
     public CommandListener(CommandDispatcher dispatcher)
@@ -31,24 +31,26 @@ public class CommandListener
 
 
     /// <summary>
-    /// Listener開始
+    /// HTTP Listenerを開始する
+    /// リクエスト受信処理はバックグラウンドで実行する
     /// </summary>
     public async Task StartListener()
     {
         try
         {
             _listener = new HttpListener();
-            // 受信町アドレス登録
 
+            // 受信町アドレスを登録
             _listener.Prefixes.Add("http://*:5029/");
 
+            // HTTP受信開始
             _listener.Start();
 
 
-
+            logger.Info("Listener開始");
             Console.WriteLine("Listener開始");
 
-            // バックグラウンドで受信処理開始
+            // リクエスト受信ループをバックグラウンドで開始
             _ = Task.Run(async () =>
             {
                 await ReceiveRequestAsync();
@@ -57,23 +59,28 @@ public class CommandListener
         catch (Exception ex)
         {
             Console.WriteLine($"E-18 Listener起動失敗 : {ex.Message}");
+            logger.Error(ex, "E-18 Listener起動失敗");
             throw;
         }
     }
 
 
     /// <summary>
-    /// Listener停止
+    /// Listener停止し、リソースを解放する
     /// </summary>
     public void StopListener()
     {
+        // Lostener停止
         _listener?.Stop();
 
+        // 使用したリソースを開放
         _listener?.Close();
 
+        // インスタンスを破棄
         _listener = null;
 
         Console.WriteLine("Listener停止");
+        logger.Info("Listener停止");
     }
 
 
@@ -85,11 +92,13 @@ public class CommandListener
     /// <returns>CommandRequest</returns>
     public CommandRequest? ParseRequest(string requestBody)
     {
+        // JSONのプロパティ名の大文字・小文字を区別しない
         var option = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         };
 
+        // JSON文字列をCommandRequestへ変換
         return JsonSerializer.Deserialize<CommandRequest>(requestBody, option);
 
     }
@@ -102,8 +111,7 @@ public class CommandListener
     /// <returns>JSON文字列</returns>
     public string CreateResponse(CommandResponse response)
     {
-
-
+        // レスポンスオブジェクトをJSONへ変換
         return JsonSerializer.Serialize(response);
     }
 
@@ -114,22 +122,24 @@ public class CommandListener
     /// </summary>
     public async Task ReceiveRequestAsync()
     {
+        // Listenerが停止されるまでリクエスト受信を繰り返す
         while(_listener != null && _listener.IsListening)
         {
             try
             {
-                // HTTPリクエスト受信待ち
+                // クライアントからのHTTPリクエストを待機
                 HttpListenerContext? context = await _listener.GetContextAsync();
 
                 // リクエストボディ読込
                 using StreamReader reader = new(context.Request.InputStream);
 
+                // リクエストボディ(JSON)を読み込む
                 string requestBody = await reader.ReadToEndAsync();
 
-                // JSON → CommandRequest変換
+                // JSONをCommandRequestへ変換
                 CommandRequest? request = ParseRequest(requestBody);
 
-                // リクエスト解析失敗
+                // JSON解析失敗の場合は400(Bad Request)
                 if (request == null)
                 {
                     context.Response.StatusCode = 400;
@@ -137,22 +147,27 @@ public class CommandListener
                     continue;
                 }
 
-                // JOB情報未設定
+                // JOB情報が存在しない場合は400(Bad Request)
                 if (request.Job == null)
                 {
-                    Console.WriteLine("Job == null");
+                    logger.Info("Job == null");
                     context.Response.StatusCode = 400;
                     context.Response.Close();
                     continue;
                 }
-                Console.WriteLine($"受信時刻 : {DateTime.Now:HH:mm:ss}");
 
-                // JOB実行中の場合
-                // STOP指示のみ受け付け新規JOBは受け付けずPENDING返却
+                // JOB受付ログ出力
+                Console.WriteLine("JOB受信");
+                logger.Info($"JOB受信 : {request.Job.JobId}({request.Job.Command})");
+
+
+                // JOB実行中(TRAVELING)の場合は
+                // STOP以外の新規JOBは受け付けずPENDINGを返す
                 if (request.Job.Command != null &&
                     request.Job.Command != "STOP" &&
                     AppState.OperationState == OperationState.TRAVELING)
                 {
+                    // PENDINGレスポンス生成
                     CommandResponse response = new()
                     {
                         StockerId = "STK001",
@@ -174,7 +189,7 @@ public class CommandListener
                     continue;
                 }
 
-                // IDLEならJOB実行依頼
+                // 受信したコマンドをDispatcherへ処理依頼
                 await _dispatcher.Dispatch(request.Job);
 
 
@@ -183,6 +198,7 @@ public class CommandListener
 
                 if (request.Job.Command == "STOP")
                 {
+                    // STOPはABORTEDを返却
                     successResponse = new()
                     {
                         StockerId = "STK001",
@@ -194,6 +210,7 @@ public class CommandListener
                 }
                 else
                 {
+                    // TRANSFERは受付成功レスポンスを返却
                     successResponse = new()
                     {
                         StockerId = "STK001",
@@ -201,36 +218,51 @@ public class CommandListener
                     };
                 }
 
+
                 string successJson = CreateResponse(successResponse);
 
+                // JSON文字列をHTTP送信用のバイト配列へ変換
                 byte[] buffer = Encoding.UTF8.GetBytes(successJson);
 
+                // HTTP 200(OK)を返却
                 context.Response.StatusCode = 200;
+
+                // レスポンス形式をJSONとして通知
                 context.Response.ContentType = "application/json";
+
+                // レスポンスサイズを設定
                 context.Response.ContentLength64 = buffer.Length;
 
+                // JSONデータをレスポンスへ書き込む
                 await context.Response.OutputStream.WriteAsync(
                     buffer,
                     0,
                     buffer.Length);
 
+                // バッファ内のデータをクライアントへ送信
                 await context.Response.OutputStream.FlushAsync();
 
+                // レスポンスを終了し接続を閉じる
                 context.Response.Close();
             }
             catch (HttpListenerException)
             {
+                // Listener停止時に発生する例外
                 Console.WriteLine("Listener停止");
+                logger.Info("Listener停止");
             }
             catch (OperationCanceledException)
             {
+                // キャンセルによる正常終了
                 Console.WriteLine("Listener停止");
+                logger.Info("Listener停止");
             }
 
             catch (Exception ex)
             {
                 // 想定外エラー
                 Console.WriteLine($"E-16 予期しない例外 : {ex.Message}");
+                logger.Error(ex, "E-16 予期しない例外");
             }
         }
     }
