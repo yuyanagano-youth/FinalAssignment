@@ -46,7 +46,7 @@
     }
 
     async function loadJobs() {
-        const res = await AmhsCore.getActiveJobs(); // 全ストッカー分を取得（stockerId省略）
+        const res = await AmhsCore.getActiveJobs(); // 全ストッカー分を取得（stockerId省略） GET /api/jobs/active
         if (!res.ok) {
             jobList.innerHTML = `<p class="text-danger text-center mt-4">状態取得失敗</p>`; // UI-009
             return;
@@ -57,11 +57,11 @@
     async function handleDelete(jobId) {
         if (!confirm(`ジョブ ${jobId} を削除します。よろしいですか？`)) return;
 
-        const res = await AmhsCore.deleteJob(jobId);
+        const res = await AmhsCore.deleteJob(jobId);   //// DELETE /api/jobs/{jobId}
         if (!res.ok) {
             alert("ジョブ削除に失敗しました"); // UI-008
         }
-        await loadJobs();
+        await loadJobs();    // 一覧を再読込
     }
 
     function startPollingLoop() {

@@ -3,7 +3,7 @@ using ASSTMS_STKC.Data.Repositories;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
-//For generation and trust certificate  ,Kestrel in ASP.NET Core app:
+//For generation and trust certificate  , Kestrel in ASP.NET Core app:
 //builder.WebHost.ConfigureKestrel(options =>
 //{
 //    options.ListenAnyIP(7196, listenOptions =>
