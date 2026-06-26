@@ -1,13 +1,9 @@
 ﻿using stocker.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace stocker.Models
 {
     public static class AppState
     {
-
         public static ConnectionStatus ConnectionStatus { get; set; } = ConnectionStatus.OFFLINE;
 
         public static OperationState OperationState { get; set; } = OperationState.IDLE;
@@ -17,7 +13,5 @@ namespace stocker.Models
         public static string? AcceptedJobId { get; set; }
 
         public static CancellationTokenSource? CancellationTokenSource { get; set; }
-
-
     }
 }
