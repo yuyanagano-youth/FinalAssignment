@@ -52,7 +52,7 @@ namespace ASSTMS_STKC.Services
                             Job: jobRecord
                         );
 
-                        string stubUrl = "https://172.16.7.19:5029/";
+                        string stubUrl = "http://172.16.7.19:5029/";
                         var response = await _httpClient.PostAsJsonAsync(stubUrl, requestPayload);
 
                         //if (response.IsSuccessStatusCode)

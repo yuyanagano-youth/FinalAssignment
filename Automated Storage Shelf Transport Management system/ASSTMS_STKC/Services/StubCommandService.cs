@@ -14,7 +14,7 @@ namespace ASSTMS_STKC.Services
         public async Task<HttpResponseMessage> SendStopCommandAsync(OperationInstructionsReq request)
         {
             HttpResponseMessage response =
-                await _httpClient.PostAsJsonAsync($"https://172.16.7.19:5029/",request);
+                await _httpClient.PostAsJsonAsync($"http://172.16.7.19:5029/",request);
 
             return response;
         }
