@@ -1,5 +1,4 @@
-﻿using ASSTMS_STKC.SharedModels;
-using ASSTMS_STKC.SharedModels.Models;
+﻿using ASSTMS_STKC.SharedModels.Models;
 using System.Data;
 using Dapper;
 

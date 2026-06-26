@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace ASSTMS_STKC.SharedModels
+﻿namespace ASSTMS_STKC.SharedModels
 {
 
     //フロントエンド用

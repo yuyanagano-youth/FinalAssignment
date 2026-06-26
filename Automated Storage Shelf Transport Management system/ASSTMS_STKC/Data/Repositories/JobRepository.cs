@@ -18,7 +18,6 @@ namespace ASSTMS_STKC.Data.Repositories
         // 1. JOBの新規登録 (INSERT)
         public async Task<string> InsertJob(JobCreateReq req)
         {
-            //実際の採番は別クラス
             string newJobId = "JOB" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
             string sql = @"
@@ -45,6 +44,7 @@ namespace ASSTMS_STKC.Data.Repositories
         // 2. JOBの一覧取得 (SELECT)
         public async Task<List<JobInfo>> GetAllJobs(string? stockerId)
         {
+            //NULLの場合は全件取得
             string sql = @"
                 SELECT * 
                 FROM Jobs
@@ -59,36 +59,24 @@ namespace ASSTMS_STKC.Data.Repositories
 
         }
 
-        // 3. 選択JOB取得 (SELECT)
-        public async Task<JobInfo?> GetJobById(string jobId)
+        // 3. 一番古いJOBの取得 (SELECT)
+        public async Task<JobInfo?> GetOldestUnprocessedJob(string stockerId)
         {
+            //ステータスが「PENDING」のジョブを古い順に並べて一件取得
             string sql = @"
-                SELECT * 
-                FROM Jobs
-                WHERE JobID = @JobId";
-
-            using (IDbConnection db = _context.CreateConnection())
-            {
-                return db.QueryFirstOrDefault<JobInfo>(sql, new{JobId = jobId});
-            }
-        }
-
-        // 4. 一番古いJOBの取得 (SELECT)
-        public async Task<JobInfo?> GetOldestUnprocessedJob()
-        {
-            string sql = @"
-                SELECT TOP 1 * 
-                FROM Jobs
-                WHERE JobStatus = 'PENDING'
+                SELECT j.* FROM Jobs j
+                INNER JOIN Stockers s ON j.StockerID = s.StockerID
+                WHERE j.JobStatus = 'PENDING'
+                AND s.StockerID = @StockerId
                 ORDER BY CreatedAt ASC";
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.QueryFirstOrDefault<JobInfo>(sql);
+                return await db.QueryFirstOrDefaultAsync<JobInfo>(sql, new {StockerID = stockerId});
             }
         }
 
-        // 5. JOBステータスの変更 (UPDATE)
+        // 4. JOBステータスの変更 (UPDATE)
         public async Task<int> UpdateJobStatus(string jobId, string status)
         {
             string sql = @"
@@ -98,7 +86,7 @@ namespace ASSTMS_STKC.Data.Repositories
 
             using (IDbConnection db = _context.CreateConnection())
             {
-               return db.Execute(sql, new
+               return await db.ExecuteAsync(sql, new
                 {
                     JobID = jobId,
                     Status = status
@@ -106,7 +94,7 @@ namespace ASSTMS_STKC.Data.Repositories
             }
         }
 
-        // 6. JOB削除 (DELETE)
+        // 5. JOB削除 (DELETE)
         public async Task<bool> DeleteOrCancelJob(string jobId)
         {
             string sql = @"
@@ -116,11 +104,11 @@ namespace ASSTMS_STKC.Data.Repositories
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.Execute(sql, new{JobID = jobId, JobStatus = "PENDING" }) > 0;
+                return await db.ExecuteAsync(sql, new{JobID = jobId, JobStatus = "PENDING" }) > 0;
             }
         }
 
-        // 7. 入庫ジョブ（IN_PORT）が既に存在するか (SELECT)
+        // 6. 入庫ジョブ（IN_PORT）が既に存在するか (SELECT)
         public async Task<bool> ExistsInboundJob(string carrierId)
         {
             string sql = @"
@@ -132,12 +120,12 @@ namespace ASSTMS_STKC.Data.Repositories
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return db.ExecuteScalar<int>(sql, new { CarrierId = carrierId }) > 0;
+                return await db.ExecuteScalarAsync<int>(sql, new { CarrierId = carrierId }) > 0;
             }
 
         }
 
-        // 8. 出庫ジョブ（OUT_PORT）が既に存在するか (SELECT)
+        // 7. 出庫ジョブ（OUT_PORT）が既に存在するか (SELECT)
         public async Task<bool> ExistsOutboundJob(string carrierId)
         {
             string sql = @"
