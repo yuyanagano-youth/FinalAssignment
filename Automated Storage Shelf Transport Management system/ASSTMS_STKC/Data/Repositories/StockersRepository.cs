@@ -1,8 +1,6 @@
-﻿using ASSTMS_STKC.SharedModels;
-using ASSTMS_STKC.SharedModels.Models;
+﻿using ASSTMS_STKC.SharedModels.Models;
 using Dapper;
 using System.Data;
-using System.Text.Json;
 
 namespace ASSTMS_STKC.Data.Repositories
 {
@@ -71,37 +69,19 @@ namespace ASSTMS_STKC.Data.Repositories
         public async Task<List<string>> TimeoutOfflineStockers(int timeoutSeconds)
         {
             //最終通信時刻が(現在時刻-設定時間)より前の時間のレコードを一括変更
-            //string sql = @"
-            //    -- 1. オフラインになるStockerIdでRUNNING状態のJOBがあればABORTEDにする
-            //    UPDATE j
-            //    SET j.JobStatus = 'ABORTED'
-            //    FROM Jobs j
-            //    INNER JOIN Stockers s ON j.StockerID = s.StockerID
-            //    WHERE j.JobStatus = 'RUNNING'
-            //    AND s.LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());
-
-            //    -- 2. タイムアウトしたStockerIdを一括でOFFLINEに変更
-            //    UPDATE Stockers
-            //    SET ConnectionStatus = 'OFFLINE',OperationState = 'IDLE'
-            //    WHERE LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE());";
-
-            //using (IDbConnection db = _context.CreateConnection())
-            //{
-            //    return db.Execute(sql, new
-            //    {
-            //        Timeout = timeoutSeconds
-            //    });
-            //}
             string sql = @"
+                --『@OfflineStockers』OFFLINEのStockerIDを一時保存する場所
                 DECLARE @OfflineStockers TABLE (StockerId NVARCHAR(50));
 
                 INSERT INTO @OfflineStockers
                 OUTPUT inserted.StockerId
                 SELECT StockerId
                 FROM Stockers
+                -- LastHeartbeatと(現在時刻 - @Timeout(30秒))を比較する
                 WHERE LastHeartbeat <= DATEADD(SECOND, -@Timeout, GETDATE())
                 AND ConnectionStatus <> 'OFFLINE';
 
+                --OFFLINEになるStockerIDの担当ジョブからRUNNING状態のものをABORTEDに変更
                 UPDATE j
                 SET j.JobStatus = 'ABORTED'
                 FROM Jobs j
@@ -109,6 +89,7 @@ namespace ASSTMS_STKC.Data.Repositories
                 ON j.StockerID = s.StockerId
                 WHERE j.JobStatus = 'RUNNING';
 
+                --OFFLINEになるStockerIDをOFFLINE、IDLEに変更
                 UPDATE s
                 SET ConnectionStatus = 'OFFLINE',
                 OperationState = 'IDLE'
@@ -116,6 +97,7 @@ namespace ASSTMS_STKC.Data.Repositories
                 INNER JOIN @OfflineStockers o
                 ON s.StockerId = o.StockerId;
 
+                --OFFLINEになるStockerIDを取得
                 SELECT StockerId FROM @OfflineStockers;
                 ";
 
@@ -133,7 +115,6 @@ namespace ASSTMS_STKC.Data.Repositories
         // 5　通信の度に最終通信時間を更新 (UPDATE)
         public async Task<int> updateLastSeenTime(string stockerid)
         {
-            //最終通信時刻が(現在時刻-設定時間)より前の時間のレコードを一括変更
             string sql = @"
                 UPDATE Stockers
                 SET LastHeartbeat = GETDATE()
@@ -149,17 +130,19 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         //6 送信用のJOBを取得
-        public async Task<IEnumerable<JobInfo>> GetPendingJobsAsync()
+        public async Task<JobInfo> GetPendingJobsAsync()
         {
             string sql = @"
-        SELECT j.* FROM Jobs j
-        INNER JOIN Stockers s ON j.StockerId = s.StockerId
-        WHERE j.JobStatus = 'PENDING'          -- 条件1: 実行待ちのJOB
-          AND s.ConnectionStatus = 'ONLINE'; -- 条件2: 保管棚がオンライン状態のもの";
+                SELECT TOP 1 j.* FROM Jobs j
+                INNER JOIN Stockers s ON j.StockerId = s.StockerId
+                WHERE j.JobStatus = 'PENDING'
+                AND s.ConnectionStatus = 'ONLINE'
+                AND s.OperationState = 'IDLE'
+                ORDER BY CreatedAt ASC";
 
             using (IDbConnection db = _context.CreateConnection())
             {
-                return await db.QueryAsync<JobInfo>(sql);
+                return await db.QueryFirstOrDefaultAsync<JobInfo>(sql);
             }
         }
 
@@ -168,9 +151,9 @@ namespace ASSTMS_STKC.Data.Repositories
         public async Task<JobInfo?> GetTravelingJobsAsync()
         {
             string sql = @"
-        SELECT j.* FROM Jobs j
-        INNER JOIN Stockers s ON j.StockerId = s.StockerId
-        WHERE j.JobStatus = 'RUNNING'";
+                SELECT j.* FROM Jobs j
+                INNER JOIN Stockers s ON j.StockerId = s.StockerId
+                WHERE j.JobStatus = 'RUNNING'";
 
             using (IDbConnection db = _context.CreateConnection())
             {

@@ -32,9 +32,8 @@ namespace ASSTMS_STKC.Services
                 return (false, Message);
             }
 
-            // =================================================
             // 入庫判定
-            // =================================================
+
             if (req.Source == "IN_PORT")
             {
                 var existsInShelf = await _shelfRepository.ExistsCarrier(req.StockerId,req.CarrierId);
@@ -73,9 +72,8 @@ namespace ASSTMS_STKC.Services
                 return (true, string.Empty);
             }
 
-            // =================================================
             // 出庫判定
-            // =================================================
+
             else if (req.Destination == "OUT_PORT")
             {
                 var existsInShelf = await _shelfRepository.ExistsCarrierInSourceShelf(req.Source,req.CarrierId);

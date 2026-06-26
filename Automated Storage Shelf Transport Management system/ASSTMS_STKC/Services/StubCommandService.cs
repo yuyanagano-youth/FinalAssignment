@@ -1,8 +1,4 @@
-﻿using ASSTMS_STKC.Data;
-using ASSTMS_STKC.Data.Repositories;
-using ASSTMS_STKC.SharedModels;
-using ASSTMS_STKC.SharedModels.Models;
-using System.Net;
+﻿using ASSTMS_STKC.SharedModels;
 
 namespace ASSTMS_STKC.Services
 {
@@ -18,8 +14,7 @@ namespace ASSTMS_STKC.Services
         public async Task<HttpResponseMessage> SendStopCommandAsync(OperationInstructionsReq request)
         {
             HttpResponseMessage response =
-                await _httpClient.PostAsJsonAsync($"http://172.16.7.19:5029/",request);
-            //await _httpClient.PostAsJsonAsync($"http://localhost:5029/", request);
+                await _httpClient.PostAsJsonAsync($"https://172.16.7.19:5029/",request);
 
             return response;
         }

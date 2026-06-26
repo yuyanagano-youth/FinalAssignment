@@ -2,11 +2,8 @@
 using ASSTMS_STKC.Services;
 using ASSTMS_STKC.SharedModels;
 using ASSTMS_STKC.SharedModels.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASSTMS_STKC.Controllers
 {
@@ -128,7 +125,6 @@ namespace ASSTMS_STKC.Controllers
                     {
                         Message = $"JOB削除完了: {jobId}"
                     });
-                    //return Ok();
                 }
 
                 else
@@ -138,7 +134,6 @@ namespace ASSTMS_STKC.Controllers
                     {
                         Message = $"JOB削除に失敗しました: {jobId}"
                     });
-                    //return Ok();
                 }
             }
 
@@ -293,7 +288,7 @@ namespace ASSTMS_STKC.Controllers
                             if (result == null)
                             {
                                 _logger.LogError("[STUB] JSON変換に失敗しました");
-                                return BadRequest();
+                                return StatusCode(500);
                             }
 
                             if (string.IsNullOrEmpty(result.JobId) ||
@@ -302,7 +297,7 @@ namespace ASSTMS_STKC.Controllers
                                 string.IsNullOrEmpty(result.CurrentOperationState))
                             {
                                 _logger.LogError("[STUB] レスポンス項目不足がたりません");
-                                return BadRequest();
+                                return StatusCode(500);
                             }
 
                             _logger.LogInformation("[STUB] 搬送中断");

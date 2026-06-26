@@ -1,10 +1,7 @@
 ﻿using ASSTMS_STKC.Data.Repositories;
-using ASSTMS_STKC.Services;
 using ASSTMS_STKC.SharedModels;
 using ASSTMS_STKC.SharedModels.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Buffers;
-using System.Data;
 
 namespace ASSTMS_STKC.Controllers
 {
@@ -14,7 +11,6 @@ namespace ASSTMS_STKC.Controllers
 
     public class StubController : ControllerBase
     {
-        //必要ないものは後で消す
         private readonly StockersRepository _stockersRepository;
         private readonly ShelfRepository _shelfRepository;
         private readonly LogRepository _logRepository;
@@ -76,8 +72,12 @@ namespace ASSTMS_STKC.Controllers
 
             try
             {
-                //JSONデータのnull判別の方法は要確認
-                if (req == null || string.IsNullOrEmpty(req.StockerId) || string.IsNullOrEmpty(req.Job.JobId) || string.IsNullOrEmpty(req.JobStatus) || string.IsNullOrEmpty(req.CurrentOperationState))
+                if (req == null ||
+                    string.IsNullOrEmpty(req.StockerId) ||
+                    string.IsNullOrEmpty(req.Job.JobId) ||
+                    string.IsNullOrEmpty(req.JobStatus) ||
+                    string.IsNullOrEmpty(req.CurrentOperationState)
+                    )
                 {
                     return BadRequest(new { Message = "JSONデータの変換に失敗しました。" });
                 }
@@ -110,16 +110,30 @@ namespace ASSTMS_STKC.Controllers
 
             try
             {
-                if (req == null || string.IsNullOrEmpty(req.StockerId) || string.IsNullOrEmpty(req.Job.JobId) || string.IsNullOrEmpty(req.JobStatus) || string.IsNullOrEmpty(req.CurrentOperationState))
+                if (req == null || 
+                    string.IsNullOrEmpty(req.StockerId) || 
+                    string.IsNullOrEmpty(req.Job.JobId) || 
+                    string.IsNullOrEmpty(req.JobStatus) || 
+                    string.IsNullOrEmpty(req.CurrentOperationState)||
+                    string.IsNullOrEmpty(req.Job.Source) ||      
+                    string.IsNullOrEmpty(req.Job.Destination) || 
+                    string.IsNullOrEmpty(req.Job.CarrierId)
+                    )
                 {
                     return BadRequest(new { Message = "JSONデータの変換に失敗しました。" });
                 }
 
-                //更新対象が存在しない場合の処理を追加
                 int stockerRows = await _stockersRepository.UpdateOperationState(req.StockerId, req.CurrentOperationState);
                 int jobRows = await _jobRepository.UpdateJobStatus(req.Job.JobId, req.JobStatus);
-                int insertRow = await _shelfRepository.InsertStock(req.Job.Destination, req.Job.CarrierId);
-                int deleteRow = await _shelfRepository.DeleteStockByShelfId(req.Job.Source);
+
+                if (req.Job.Source == "IN_PORT")
+                {
+                    int insertRow = await _shelfRepository.InsertStock(req.Job.Destination, req.Job.CarrierId);
+                }
+                else
+                {
+                    int deleteRow = await _shelfRepository.DeleteStockByShelfId(req.Job.Source);
+                }
 
                 _logger.LogInformation($"[STUB] 搬送完了　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
                 await _logRepository.InsertLog(req.StockerId, "INFO", $"搬送完了　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
@@ -129,11 +143,9 @@ namespace ASSTMS_STKC.Controllers
 
             catch (Exception ex)
             {
-                //_logger.Error(ex);
-
                 return StatusCode(500, new
                 {
-                    message = "サーバー内部でエラーが発生しました"
+                    ex,message = $"サーバー内部でエラーが発生しました{ex.Message}"
                 });
             }
         }
@@ -154,13 +166,12 @@ namespace ASSTMS_STKC.Controllers
                     });
                 }
 
-                JobInfo? job = await _jobRepository.GetOldestUnprocessedJob();
+                JobInfo? job = await _jobRepository.GetOldestUnprocessedJob(req.StockerId);
 
                 if (job == null)
                 {
                     Console.WriteLine("未処理のJOBはありませんでした。");
 
-                    // 例：JOBがない状態のレスポンスを作って返す
                     var emptyPayload = new PollingRes(
                         HasPendingJob: false,
                         Job: null
@@ -190,7 +201,7 @@ namespace ASSTMS_STKC.Controllers
 
                 return StatusCode(500, new
                 {
-                    message = "サーバー内部でエラーが発生しました"
+                    ex,message = $"サーバー内部でエラーが発生しました{ex.Message}"
                 });
             }
         }

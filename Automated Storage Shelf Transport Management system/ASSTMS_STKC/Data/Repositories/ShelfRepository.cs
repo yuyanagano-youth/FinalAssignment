@@ -1,7 +1,6 @@
 ﻿using ASSTMS_STKC.SharedModels.Models;
 using Dapper;
 using System.Data;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASSTMS_STKC.Data.Repositories
 {
@@ -54,7 +53,7 @@ namespace ASSTMS_STKC.Data.Repositories
             string sql = @"
                 UPDATE Shelves 
                 SET CarrierID = null
-                WHERE ShelfName = @ShelfId";
+                WHERE ShelfName = @ShelfId;";
 
             using (IDbConnection db = _context.CreateConnection())
             {

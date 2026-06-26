@@ -3,16 +3,15 @@ using ASSTMS_STKC.Data.Repositories;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
 //For generation and trust certificate  , Kestrel in ASP.NET Core app:
-//builder.WebHost.ConfigureKestrel(options =>
-//{
-//    options.ListenAnyIP(7196, listenOptions =>
-//    {
-//        listenOptions.UseHttps("C:\\Windows\\System32\\10.189.18.126.p12", "changeit");
-//    });
-//});
-
-
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(7196, listenOptions =>
+    {
+        listenOptions.UseHttps("C:\\172.16.7.6+2.p12", "changeit");
+    });
+});
 
 
 
@@ -30,8 +29,6 @@ builder.Services.AddHostedService<ASSTMS_STKC.Services.StockerTimeoutService>();
 builder.Services.AddHostedService<ASSTMS_STKC.Services.JobDispatcher>();
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
-
-
 
 
 builder.Services.AddHttpClient();
