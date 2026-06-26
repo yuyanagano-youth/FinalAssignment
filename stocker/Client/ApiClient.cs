@@ -24,7 +24,7 @@ public class ApiClient
         //_httpClient.Timeout = TimeSpan.FromSeconds(30);
 
         // サーバーのベースURL設定
-        _httpClient.BaseAddress = new Uri("https://172.16.7.6:7196/");
+        _httpClient.BaseAddress = new Uri("http://172.16.7.6:5028/");
     }
 
 
