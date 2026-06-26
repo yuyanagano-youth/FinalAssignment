@@ -11,11 +11,8 @@
     let pollTimerId = null;
 
     // R-003用：タップによるローカル表示切替の状態を保持する一時マップ。
-    // 【注意】仕様書にはタップ操作に対応する書き込み系APIの定義が無いため、
     // ここでの色変更はあくまで画面上のデモ表示であり、サーバーには反映されない。
-    // 実際にタップで棚状態を変更する運用にする場合は、バックエンド担当者と
-    // 専用エンドポイント（例: PATCH /api/inventory/shelves/{shelfName}）の追加を相談すること。
-    const localOverride = new Map();
+    const localOverride = new Map(); //画面上のみの一時上書き状態
 
     function escapeHtml(str) {
         return String(str).replace(/[&<>"']/g, (c) => ({

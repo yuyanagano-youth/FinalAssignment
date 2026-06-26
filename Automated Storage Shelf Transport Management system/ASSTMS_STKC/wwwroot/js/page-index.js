@@ -8,9 +8,6 @@
  */
 (() => {
     const REFRESH_INTERVAL_MS = 3000; // 5.2「リアルタイム定期監視モジュール」仕様: 3,000ms間隔
-    // ※ 仕様書 4.1 では「2000ms間隔」、5.2 では「3000ms間隔」と記載が分かれていたため、
-    //    本実装ではコンソール側ハートビート周期(3秒)と揃えて一貫性を取っている。
-    //    実運用前にバックエンド/コンソール担当者と最終的なポーリング間隔を確認すること。
 
     let pollTimerId = null;
     let activeStockers = [];      // F-005 Activeシールド適用後の一覧
@@ -73,7 +70,8 @@
     }
 
     /** Rule F-007（安全インターロック）の見た目反映 */
-    function applyInterlock(stocker) {
+    function applyInterlock(stocker)
+    {
         if (!stocker) {
             connBadge.textContent = "---";
             opBadge.textContent = "---";
@@ -81,19 +79,17 @@
             return;
         }
 
-        connBadge.textContent = stocker.connectionStatus;
+        connBadge.textContent = stocker.connectionStatus;    // "ONLINE" or "OFFLINE"
         connBadge.className = "badge " + (stocker.connectionStatus === AmhsCore.Status.Connection.ONLINE ? "badge-online" : "badge-offline");
 
-        opBadge.textContent = stocker.operationState;
+        opBadge.textContent = stocker.operationState;    // "IDLE", "TRAVELING", "ALARM" etc.
         opBadge.className = "badge " + AmhsCore.operationBadgeClass(stocker.operationState);
 
         // F-007: OFFLINE または TRAVELING のときはディスパッチ無効化
         btnDispatch.disabled = AmhsCore.isDispatchDisabled(stocker);
 
-        // alarms配列の内容を「選択中ストッカーの現在状態」として常に反映する。
-        // 以前は alarms がある場合のみ showAlert() していたため、
+        // alarms配列の内容を「選択中ストッカーの現在状態」として常に反映する
         // 一度アラームが出た後に別のストッカー（alarms無し）へ切り替えても
-        // 古いアラーム表示が消えずに残ってしまう不具合があった。
         // → alarms が無いときは明示的に clearAlert() を呼ぶ。
         if (stocker.alarms && stocker.alarms.length > 0) {
             const msgs = stocker.alarms.map(a => `[${a.errorCode}] ${a.message}`).join(" / ");
@@ -105,7 +101,7 @@
 
     /** 選択中ストッカーの最新状態を1件取得して画面に反映する（状態監視ループ本体） */
     async function refreshStockerStatus() {
-        const res = await AmhsCore.getStockers();
+        const res = await AmhsCore.getStockers();      // GET /api/stockers を呼び出し
 
         if (!res.ok) {
             logPoll(`GET /api/front/stockers 失敗 (status=${res.status})`, true);
@@ -152,6 +148,7 @@
             return;
         }
 
+        // API呼び出し：POST /api/equipment/command
         btnDispatch.disabled = true;
         const res = await AmhsCore.postEquipmentCommand({
             command: AmhsCore.Status.Command.TRANSFER,
@@ -164,7 +161,7 @@
         if (res.ok && res.data?.success) {
             clearAlert();
             showToast("ジョブの送信に成功しました");
-            carrierIdInput.value = "";
+            carrierIdInput.value = "";             //フォーム初期化
             logPoll(`POST /api/front/equipment/command OK jobId=${res.data.jobId}`);
         } else {
             // HTTP 400: サーバーから返却されたmessageを赤文字で即時描画（F-003）

@@ -4,8 +4,8 @@
   "description": "Automated Storage and Transfer Management System - スマートフォン操作コンソール",
   "start_url": "/Index",
   "scope": "/",
-  "display": "standalone",
-  "orientation": "portrait",
+  "display": "standalone", // // ← ネイティブアプリ風（ブラウザUIなし）
+  "orientation": "portrait", // // ← 縦向きのみ（16:9 Android対応）
   "background_color": "#0f1115",
   "theme_color": "#0d1b2a",
   "icons": [
