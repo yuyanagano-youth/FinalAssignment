@@ -17,7 +17,7 @@
 // false : 実際の ASP.NET Core API (同一オリジン / localhost) を呼び出す。
 //         結合テスト・本番リリース時にこの値を false へ切り替えるだけでよい。
 // ============================================================================
-const USE_MOCK_API = false;
+const USE_MOCK_API = true;
 
 // 実APIのベースURL。リバースプロキシ等で配信パスが変わる場合のみ変更する。
 const API_BASE = "";
@@ -41,7 +41,7 @@ const AmhsCore = (() => {
         }
 
         // ====================================================================
-        // ▼▼▼ 【実API接続ポイント】 ここが本番バックエンドへの実通信箇所 ▼▼▼
+        //  【実API接続ポイント】 ここが本番バックエンドへの実通信箇所 
         // バックエンド(SQL/API)担当者が実装したASP.NET Core APIに対し、
         // 標準のfetch()でHTTPリクエストを送信する。
         // USE_MOCK_API = false に切り替えるだけで、このブロックが有効化される。
@@ -106,18 +106,14 @@ const AmhsCore = (() => {
      * 【仕様書 2.1-②より】
      * command="TRANSFER" の場合: stockerId/carrierId/source/destination をすべて指定する。
      * command="STOP" の場合: 仕様書のサンプルでは stockerId/carrierId/source/destination が
-     *   すべて null になっている → これはストッカー個別ではなく、システム全体への停止指示と読める。
-     *   ※ 実際にUI側でどのストッカーのSTOPボタンを押しても全停止にすべきか、
      *      それとも対象ストッカーIDを送ってよいかは、バックエンド担当者と要確認。
      *      現時点ではUIの選択中ストッカーIDをそのまま送るが、
-     *      バックエンド側がstockerIdを無視する実装であれば問題は起きない。
      */
     async function postEquipmentCommand(payload) {
         return request("POST", "/api/front/equipment/command", payload);
     }
 
     /**
-     * 【注意】このAPIはフロントエンドの仕様書（2.1節）には存在しない。
      * 仕様書 2.2節に記載の /api/stub/equipment/polling は
      * 「コンソールアプリ（C#）⇄ サーバー」専用のエンドポイントであり、
      * 本来Webフロントエンドからは呼び出さない（担当範囲外）。
@@ -125,7 +121,6 @@ const AmhsCore = (() => {
      * ここに残しているのは、コンソールアプリが未実装の段階で、
      * バックエンドの /api/stub/equipment/polling が正しく応答するかを
      * 手動で動作確認するための「デバッグ専用ツール」として。
-     * 本番のUIフローでは使用しないこと。
      *
      * POST /api/stub/equipment/polling
      * @param {{stockerId:string, currentOperationState:string}} payload
