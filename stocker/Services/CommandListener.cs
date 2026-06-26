@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
-using Microsoft.AspNetCore.Http.HttpResults;
-using NLog;
+﻿using NLog;
 using stocker.Enums;
 using stocker.Models;
-using stocker.Services;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -28,8 +25,6 @@ public class CommandListener
         _dispatcher = dispatcher;
     }
 
-
-
     /// <summary>
     /// HTTP Listenerを開始する
     /// リクエスト受信処理はバックグラウンドで実行する
@@ -41,7 +36,7 @@ public class CommandListener
             _listener = new HttpListener();
 
             // 受信町アドレスを登録
-            _listener.Prefixes.Add("http://*:5029/");
+            _listener.Prefixes.Add("https://*:7192/");
 
             // HTTP受信開始
             _listener.Start();

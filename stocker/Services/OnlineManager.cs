@@ -1,9 +1,5 @@
 ﻿using stocker.Enums;
 using stocker.Models;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
 using NLog;
 
 namespace stocker.Services;
@@ -20,6 +16,9 @@ public class OnlineManager
     // オンライン通知サービス
     private readonly NotificationService _notificationService;
 
+    // 
+    private readonly CommandListener _commandListener;
+
     // ポーリングサービス
     private readonly PollingService _pollingService;
 
@@ -28,11 +27,13 @@ public class OnlineManager
 
     public OnlineManager(NotificationService notificationService,
         PollingService pollingService,
-        JobService jobService)
+        JobService jobService,
+        CommandListener commandListener)
     {
         _notificationService = notificationService;
         _pollingService = pollingService;
         _jobService = jobService;
+        _commandListener = commandListener;
     }
 
     /// <summary>
@@ -82,6 +83,9 @@ public class OnlineManager
         // サーバーへオンライン通知を送信
         await _notificationService.SendOnlineAsync(stockerId);
 
+        // Listener開始
+        await _commandListener.StartListener();
+
         // ポーリング開始
         await _pollingService.StartPolling();
 
@@ -102,8 +106,12 @@ public class OnlineManager
             return;
         }
 
+        // Listener停止
+        _commandListener.StopListener();
+
         // ポーリング停止
         _pollingService.StopPolling();
+        Console.WriteLine("ポーリング停止");
 
         // 搬送中のJOBがある場合は、オフライン化に伴いキャンセルする
         if(AppState.OperationState == OperationState.TRAVELING)

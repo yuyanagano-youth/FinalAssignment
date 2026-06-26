@@ -1,8 +1,5 @@
 ﻿using stocker.Client;
-using stocker.Enums;
-using stocker.Models;
 using stocker.Services;
-using System;
 using NLog;
 
 
@@ -19,7 +16,7 @@ public class Program
     {
         Console.WriteLine("アプリ開始");
 
-    try
+        try
         {
 
             // 依存オブジェクト生成
@@ -34,17 +31,34 @@ public class Program
             var commandDispatcher =
                 new CommandDispatcher(jobService);
 
-            var pollingService =
-                new PollingService(
-                    apiClient,
-                    commandDispatcher);
+            // 先に変数だけ宣言（まだインスタンスは作らない）
+            OnlineManager? onlineManager = null;
 
-            var onlineManager = new OnlineManager(
-                notificationService,
-                pollingService,
-                jobService);
+            // PollingService生成
+            // 通信異常発生時に実行する処理(GoOfflineAsync)をコールバックとして渡す
+            var pollingService = new PollingService(
+                apiClient,
+                commandDispatcher,
+
+                // 通信異常発生時にPollingServiceから呼び出される処理
+                async () =>
+                {
+                    // OnlineManager生成後のみオフライン化を実行する
+                    if (onlineManager != null)
+                    {
+                        await onlineManager.GoOfflineAsync();
+                    }
+                });
 
             var commandListener = new CommandListener(commandDispatcher);
+
+            onlineManager = new OnlineManager(
+                notificationService,
+                pollingService,
+                jobService,
+                commandListener);
+
+           
 
             // アプリケーション状態を初期化
             onlineManager.Initialize();
@@ -66,16 +80,9 @@ public class Program
                         // オンライン化
                         await onlineManager.GoOnlineAsync("STK001");
 
-                        // HTTP Listener開始
-                        await commandListener.StartListener();
-
                         break;
 
                     case "2":
-
-                        // HTTP Listener停止
-                        commandListener.StopListener();
-
                         // オフライン化
                         await onlineManager.GoOfflineAsync();
 

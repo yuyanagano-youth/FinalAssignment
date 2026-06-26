@@ -2,9 +2,6 @@
 using stocker.Client;
 using stocker.Enums;
 using stocker.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace stocker.Services;
 
@@ -22,14 +19,18 @@ public class PollingService
     // サーバーから受信したコマンドを振り分けるクラス
     private readonly CommandDispatcher _dispatcher;
 
+    private readonly Func<Task>? _goOfflineAsync;
+
     // ポーリング処理の停止制御用
     private CancellationTokenSource? _pollingTokenSource;
     public PollingService(
     ApiClient apiClient,
-    CommandDispatcher dispatcher)
+    CommandDispatcher dispatcher,
+    Func<Task>? goOfflineAsync)
     {
         _apiClient = apiClient;
         _dispatcher = dispatcher;
+        _goOfflineAsync = goOfflineAsync;
     }
 
 
@@ -52,7 +53,7 @@ public class PollingService
                 await PollingAsync("STK001", AppState.OperationState.ToString());
 
                 // 次回ポーリングまで5秒待機
-                await Task.Delay(TimeSpan.FromSeconds(10),_pollingTokenSource.Token);
+                await Task.Delay(TimeSpan.FromSeconds(5),_pollingTokenSource.Token);
             }
 
         });
@@ -132,11 +133,31 @@ public class PollingService
             return response;
   
         }
+        catch (HttpRequestException ex)
+        {
+            logger.Error(ex, "サーバーとの通信に失敗");
+
+            if (AppState.ConnectionStatus == ConnectionStatus.ONLINE && _goOfflineAsync != null)
+            {
+                await _goOfflineAsync();
+            }
+
+            return null;
+        }
+        catch (TaskCanceledException ex)
+        {
+            logger.Error(ex, "通信タイムアウト");
+
+            if (AppState.ConnectionStatus == ConnectionStatus.ONLINE && _goOfflineAsync != null)
+            {
+                await _goOfflineAsync();
+            }
+
+            return null;
+        }
         catch (Exception ex)
         {
-            // 通信エラーまたは想定外の例外が発生したためポーリングを終了する
-            Console.WriteLine(ex.Message);
-            logger.Error(ex, "Polling処理で例外発生");
+            logger.Error(ex, "Polling処理で予期しない例外");
             return null;
         }
     }

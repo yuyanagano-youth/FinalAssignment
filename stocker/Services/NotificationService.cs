@@ -2,9 +2,6 @@
 using stocker.Client;
 using stocker.Enums;
 using stocker.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace stocker.Services;
 

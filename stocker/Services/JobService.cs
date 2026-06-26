@@ -1,8 +1,6 @@
 ﻿using NLog;
-using stocker.Client;
 using stocker.Enums;
 using stocker.Models;
-using stocker.Services;
 
 
 namespace stocker.Services;
