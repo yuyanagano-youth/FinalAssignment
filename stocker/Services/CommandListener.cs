@@ -88,7 +88,7 @@ public class CommandListener
     /// </summary>
     /// <param name="requestBody">受信JSON文字列</param>
     /// <returns>CommandRequest</returns>
-    public CommandRequest? ParseRequest(string requestBody)
+    public static CommandRequest? ParseRequest(string requestBody)
     {
         // JSONのプロパティ名の大文字・小文字を区別しない
         JsonSerializerOptions? option = new()
@@ -107,7 +107,7 @@ public class CommandListener
     /// </summary>
     /// <param name="response">レスポンス情報</param>
     /// <returns>JSON文字列</returns>
-    public string CreateResponse(CommandResponse response)
+    public static string CreateResponse(CommandResponse response)
     {
         // レスポンスオブジェクトをJSONへ変換
         return JsonSerializer.Serialize(response);
@@ -246,20 +246,18 @@ public class CommandListener
             catch (HttpListenerException)
             {
                 // Listener停止に伴う正常終了
-                Console.WriteLine("Listener停止");
-                logger.Info("Listener停止");
                 break;
             }
+
             catch (ObjectDisposedException)
             {
                 // Listener破棄に伴う正常終了
-                Console.WriteLine("Listener停止");
                 break;
             }
+
             catch (OperationCanceledException)
             {
                 // キャンセル要求による正常終了
-                logger.Info("Listener停止");
                 break;
             }
             catch (Exception ex)

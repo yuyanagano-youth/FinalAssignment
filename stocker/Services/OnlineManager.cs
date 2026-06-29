@@ -40,7 +40,7 @@ public class OnlineManager
     /// アプリケーション状態を初期化する。
     /// 起動時はオフライン・待機状態とする。
     /// </summary>
-    public void Initialize()
+    public static void Initialize()
     {
         // 接続状態をオフラインへ初期化
         AppState.ConnectionStatus = ConnectionStatus.OFFLINE;
@@ -52,6 +52,7 @@ public class OnlineManager
         AppState.CurrentJobId = null;
         AppState.AcceptedJobId = null;
 
+        Console.WriteLine("初期化完了");
         logger.Info("初期化完了");
 
         return;
@@ -108,6 +109,7 @@ public class OnlineManager
 
         // Listener停止
         _commandListener.StopListener();
+        Console.WriteLine("Listener停止");
 
         // ポーリング停止
         _pollingService.StopPolling();
@@ -116,7 +118,7 @@ public class OnlineManager
         // 搬送中のJOBがある場合は、オフライン化に伴いキャンセルする
         if(AppState.OperationState == OperationState.TRAVELING)
         {
-            _jobService.CancelCurrentJob();
+            JobService.CancelCurrentJob();
         }
 
 

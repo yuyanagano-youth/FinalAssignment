@@ -58,10 +58,10 @@ public class Program
                 jobService,
                 commandListener);
 
-           
+
 
             // アプリケーション状態を初期化
-            onlineManager.Initialize();
+            OnlineManager.Initialize();
 
             // 操作メニュー表示
             Console.WriteLine();
@@ -87,18 +87,6 @@ public class Program
                         await onlineManager.GoOfflineAsync();
 
                         break;
-
-                    case "0":
-
-                        // Listener停止
-                        commandListener.StopListener();
-
-                        // オフライン化
-                        await onlineManager.GoOfflineAsync();
-                        // アプリ終了
-                        Console.WriteLine("アプリ終了");
-                        logger.Info("アプリ終了");
-                        return;
 
                         // メニュー以外が入力された
                     default:

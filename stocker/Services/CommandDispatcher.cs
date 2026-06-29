@@ -98,6 +98,6 @@ public class CommandDispatcher
         logger.Info($"STOP受付 : {job.JobId}");
 
         // 実行中JOBの停止を依頼
-        await _jobService.StopJob(job.JobId);
+        await JobService.StopJob(job.JobId);
     }
 }
