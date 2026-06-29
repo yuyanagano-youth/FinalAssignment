@@ -78,10 +78,10 @@ AmhsStockerManager/
 ┌─────────────────────────────────────────────────────────────┐
 │           【バックエンド】ASP.NET Core + SQL Server          │
 │  (パートナー実装：Controllers, Models, Services)            │
-│  ・StockersController      → GET /api/stockers             │
-│  ・JobsController          → GET /api/jobs/active, DELETE  │
-│  ・InventoryController     → GET /api/inventory/shelves    │
-│  ・LogsController          → GET /api/logs/recent          │
+│  ・StockersController      → GET /api/front/stockers             │
+│  ・JobsController          → GET /api/front/jobs/active, DELETE  │
+│  ・InventoryController     → GET /api/front/inventory/shelves    │
+│  ・LogsController          → GET /api/front/logs/recent          │
 │  ・EquipmentController     → POST /api/equipment/command   │
 │                            → POST /api/equipment/heartbeat │
 └─────────────────────────────────────────────────────────────┘
