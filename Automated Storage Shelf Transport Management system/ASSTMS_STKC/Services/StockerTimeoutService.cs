@@ -30,7 +30,7 @@ namespace ASSTMS_STKC.Services
                     var stockerRepository = scope.ServiceProvider.GetRequiredService<StockersRepository>();
 
                     // 30秒通信がない保管棚をOFFLINEに更新する
-                    List<string> stockerIds = await stockerRepository.TimeoutOfflineStockers(30);
+                    List<string> stockerIds = await stockerRepository.TimeoutOfflineStockers(20);
 
                     foreach (var id in stockerIds)
                     {

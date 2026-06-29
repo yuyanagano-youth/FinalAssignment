@@ -1,6 +1,7 @@
 ﻿using ASSTMS_STKC.SharedModels.Models;
 using Dapper;
 using System.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASSTMS_STKC.Data.Repositories
 {
@@ -30,12 +31,13 @@ namespace ASSTMS_STKC.Data.Repositories
         }
 
         // 2. 入庫完了時の在庫更新 (UPDATE)
-        public async Task<int> InsertStock(string shelfId, string carrierId)
+        public async Task<int> InsertStock(string shelfId, string carrierId,string stockerId)
         {
             string sql = @"
                 UPDATE Shelves 
                 SET CarrierID = @CarrierId
-                WHERE ShelfName = @ShelfId";
+                WHERE ShelfName = @ShelfId
+                AND StockerID = @StockerId;";
 
             using (IDbConnection db = _context.CreateConnection())
             {
@@ -43,23 +45,26 @@ namespace ASSTMS_STKC.Data.Repositories
                 {
                     CarrierId = carrierId,
                     ShelfId = shelfId,
+                    StockerId = stockerId
                 });
             }
         }
 
         // 3. 出庫完了時の在庫更新 (UPDATE)
-        public async Task<int> DeleteStockByShelfId(string shelfId)
+        public async Task<int> DeleteStockByShelfId(string shelfId, string stockerId)
         {
             string sql = @"
                 UPDATE Shelves 
                 SET CarrierID = null
-                WHERE ShelfName = @ShelfId;";
+                WHERE ShelfName = @ShelfId
+                AND StockerID = @StockerId;";
 
             using (IDbConnection db = _context.CreateConnection())
             {
                 return db.Execute(sql, new
                 {
                     ShelfId = shelfId,
+                    StockerId = stockerId
                 });
             }
         }
