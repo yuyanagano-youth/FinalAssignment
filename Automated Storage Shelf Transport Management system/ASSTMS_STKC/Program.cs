@@ -5,13 +5,13 @@ using NLog.Web;
 var builder = WebApplication.CreateBuilder(args);
 
 //For generation and trust certificate  , Kestrel in ASP.NET Core app:
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(7196, listenOptions =>
-    {
-        listenOptions.UseHttps("C:\\172.16.7.6+2.p12", "changeit");
-    });
-});
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenAnyIP(7196, listenOptions =>
+//    {
+//        listenOptions.UseHttps("C:\\172.16.7.6+2.p12", "changeit");
+//    });
+//});
 
 
 
