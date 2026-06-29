@@ -58,7 +58,7 @@ public class PollingService
 
         });
 
-        Console.WriteLine("ポーリング開始");
+        Console.WriteLine("Polling開始");
         logger.Info("Polling開始");
 
         return Task.CompletedTask;
