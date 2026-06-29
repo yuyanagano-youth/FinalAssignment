@@ -2,6 +2,7 @@
 using ASSTMS_STKC.Services;
 using ASSTMS_STKC.SharedModels;
 using ASSTMS_STKC.SharedModels.Models;
+using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -63,7 +64,12 @@ namespace ASSTMS_STKC.Controllers
                 return Ok(responseList);
             }
 
-            catch(Exception ex)
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
+            }
+
+            catch (Exception ex)
             {
                 _logger.LogError(ex, $"[FRONT] 不明なエラー {ex.Message}");
                 return StatusCode(500);
@@ -92,6 +98,11 @@ namespace ASSTMS_STKC.Controllers
                 //_logger.LogInformation("[FRONT] JOB一覧取得完了");
 
                 return Ok(responseList);
+            }
+
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
             }
 
             catch (Exception ex)
@@ -137,6 +148,11 @@ namespace ASSTMS_STKC.Controllers
                 }
             }
 
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
+            }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"[FRONT] 不明なエラー {ex.Message}");
@@ -176,6 +192,11 @@ namespace ASSTMS_STKC.Controllers
                 return Ok(responseList);
             }
 
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
+            }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"[FRONT] 不明なエラー {ex.Message}");
@@ -201,6 +222,11 @@ namespace ASSTMS_STKC.Controllers
 
                 //_logger.LogInformation($"[FRONT] ログ一覧取得完了: {stockerId}");
                 return Ok(responseList);
+            }
+
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
             }
 
             catch (Exception ex)
@@ -334,6 +360,11 @@ namespace ASSTMS_STKC.Controllers
                     _logger.LogError($"不正なコマンドを受信: {req.Command}");
                     return BadRequest();
                 }
+            }
+
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
             }
 
             catch (Exception ex)

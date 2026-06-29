@@ -25,6 +25,7 @@ namespace ASSTMS_STKC.Services
 
         private async void PollAndDispatchJobs(object? state)
         {
+
             try
             {
                 //1回の定期処理ごとに、新しくスコープを作って使い終わったら捨てる
@@ -47,12 +48,12 @@ namespace ASSTMS_STKC.Services
                                 Destination: job.DestLocation   
                             );
 
-                        var requestPayload = new OperationInstructionsReq(
-                            HasPendingJob: true,
-                            Job: jobRecord
-                        );
+                    var requestPayload = new OperationInstructionsReq(
+                        HasPendingJob: true,
+                        Job: jobRecord
+                    );
 
-                        string stubUrl = "http://172.16.7.19:5029/";
+                    string stubUrl = "http://172.16.7.19:5029/";
                         var response = await _httpClient.PostAsJsonAsync(stubUrl, requestPayload);
 
                         //if (response.IsSuccessStatusCode)

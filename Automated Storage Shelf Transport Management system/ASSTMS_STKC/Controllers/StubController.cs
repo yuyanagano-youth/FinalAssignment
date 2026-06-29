@@ -1,12 +1,14 @@
 ﻿using ASSTMS_STKC.Data.Repositories;
 using ASSTMS_STKC.SharedModels;
 using ASSTMS_STKC.SharedModels.Models;
+using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASSTMS_STKC.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+
 
 
     public class StubController : ControllerBase
@@ -53,6 +55,11 @@ namespace ASSTMS_STKC.Controllers
                 return Ok();
             }
 
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
+            }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"[STUB] 不明なエラー {ex.Message}");
@@ -89,6 +96,11 @@ namespace ASSTMS_STKC.Controllers
                 await _logRepository.InsertLog(req.StockerId, "INFO", $"搬送開始　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
 
                 return Ok();
+            }
+
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
             }
 
             catch (Exception ex)
@@ -128,17 +140,22 @@ namespace ASSTMS_STKC.Controllers
 
                 if (req.Job.Source == "IN_PORT")
                 {
-                    int insertRow = await _shelfRepository.InsertStock(req.Job.Destination, req.Job.CarrierId);
+                    int insertRow = await _shelfRepository.InsertStock(req.Job.Destination, req.Job.CarrierId ,req.StockerId);
                 }
                 else
                 {
-                    int deleteRow = await _shelfRepository.DeleteStockByShelfId(req.Job.Source);
+                    int deleteRow = await _shelfRepository.DeleteStockByShelfId(req.Job.Source, req.StockerId);
                 }
 
                 _logger.LogInformation($"[STUB] 搬送完了　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
                 await _logRepository.InsertLog(req.StockerId, "INFO", $"搬送完了　搬送元: {req.Job.Source} -> 搬送先: {req.Job.Destination}");
 
                 return Ok();
+            }
+
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
             }
 
             catch (Exception ex)
@@ -195,6 +212,20 @@ namespace ASSTMS_STKC.Controllers
                 return Ok(requestPayload);
             }
 
+            catch (TaskCanceledException)
+            {
+                return StatusCode(500, new
+                {
+                    message = $"サーバー内部でエラーが発生しました(タイムアウト)"
+                });
+            }
+
+            catch (OperationCanceledException)
+            {
+                return StatusCode(408, "タイムアウトが発生");
+            }
+
+
             catch (Exception ex)
             {
                 //_logger.Error(ex);
@@ -204,6 +235,8 @@ namespace ASSTMS_STKC.Controllers
                     ex,message = $"サーバー内部でエラーが発生しました{ex.Message}"
                 });
             }
+
+
         }
 
     }
