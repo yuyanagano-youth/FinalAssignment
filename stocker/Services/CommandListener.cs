@@ -65,6 +65,10 @@ public class CommandListener
     /// </summary>
     public void StopListener()
     {
+        if(_listener == null)
+        {
+            return;
+        }
         // Lostener停止
         _listener?.Stop();
 
@@ -74,7 +78,6 @@ public class CommandListener
         // インスタンスを破棄
         _listener = null;
 
-        Console.WriteLine("Listener停止");
         logger.Info("Listener停止");
     }
 
@@ -88,7 +91,7 @@ public class CommandListener
     public CommandRequest? ParseRequest(string requestBody)
     {
         // JSONのプロパティ名の大文字・小文字を区別しない
-        var option = new JsonSerializerOptions
+        JsonSerializerOptions? option = new()
         {
             PropertyNameCaseInsensitive = true
         };
@@ -242,22 +245,29 @@ public class CommandListener
             }
             catch (HttpListenerException)
             {
-                // Listener停止時に発生する例外
+                // Listener停止に伴う正常終了
                 Console.WriteLine("Listener停止");
                 logger.Info("Listener停止");
+                break;
+            }
+            catch (ObjectDisposedException)
+            {
+                // Listener破棄に伴う正常終了
+                Console.WriteLine("Listener停止");
+                break;
             }
             catch (OperationCanceledException)
             {
-                // キャンセルによる正常終了
-                Console.WriteLine("Listener停止");
+                // キャンセル要求による正常終了
                 logger.Info("Listener停止");
+                break;
             }
-
             catch (Exception ex)
             {
                 // 想定外エラー
                 Console.WriteLine($"E-16 予期しない例外 : {ex.Message}");
                 logger.Error(ex, "E-16 予期しない例外");
+                break;
             }
         }
     }

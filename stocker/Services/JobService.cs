@@ -102,7 +102,7 @@ public class JobService
     /// 学習用のため20秒待機で搬送を表現する。
     /// </summary>
     /// <param name="job">搬送対象JOB</param>
-    public async Task ExecuteTransferAsync(JobInfo job)
+    public static async Task ExecuteTransferAsync(JobInfo job)
     {
         // 輸送開始
         Console.WriteLine("搬送開始\n");
@@ -110,7 +110,7 @@ public class JobService
 
         // 輸送時間を疑似的に再現
         // STOP要求があればキャンセルされる
-        await Task.Delay(TimeSpan.FromSeconds(20),AppState.CancellationTokenSource!.Token);
+        await Task.Delay(TimeSpan.FromSeconds(10),AppState.CancellationTokenSource!.Token);
 
         // 輸送完了
         Console.WriteLine("搬送完了");

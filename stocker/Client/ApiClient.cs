@@ -21,7 +21,7 @@ public class ApiClient
         _httpClient = new HttpClient();
 
         // 共通タイムアウト
-        //_httpClient.Timeout = TimeSpan.FromSeconds(30);
+        _httpClient.Timeout = TimeSpan.FromSeconds(30);
 
         // サーバーのベースURL設定
         _httpClient.BaseAddress = new Uri("http://172.16.7.6:5028/");
