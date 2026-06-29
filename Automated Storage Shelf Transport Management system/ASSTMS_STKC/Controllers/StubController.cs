@@ -170,7 +170,7 @@ namespace ASSTMS_STKC.Controllers
 
                 if (job == null)
                 {
-                    Console.WriteLine("未処理のJOBはありませんでした。");
+                    //Console.WriteLine("未処理のJOBはありませんでした。");
 
                     var emptyPayload = new PollingRes(
                         HasPendingJob: false,
