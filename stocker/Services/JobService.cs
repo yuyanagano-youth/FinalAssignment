@@ -102,7 +102,7 @@ public class JobService
     /// 学習用のため20秒待機で搬送を表現する。
     /// </summary>
     /// <param name="job">搬送対象JOB</param>
-    public async Task ExecuteTransferAsync(JobInfo job)
+    public static async Task ExecuteTransferAsync(JobInfo job)
     {
         // 輸送開始
         Console.WriteLine("搬送開始\n");
@@ -110,7 +110,7 @@ public class JobService
 
         // 輸送時間を疑似的に再現
         // STOP要求があればキャンセルされる
-        await Task.Delay(TimeSpan.FromSeconds(20),AppState.CancellationTokenSource!.Token);
+        await Task.Delay(TimeSpan.FromSeconds(10),AppState.CancellationTokenSource!.Token);
 
         // 輸送完了
         Console.WriteLine("搬送完了");
@@ -122,7 +122,7 @@ public class JobService
     /// 実行中JOBを停止する。
     /// </summary>
     /// <param name="jobId">停止対象JOBID</param>
-    public async Task StopJob(string jobId)
+    public static async Task StopJob(string jobId)
     {
         // STOP対象JOBが現在実行中か確認
         if (AppState.OperationState != OperationState.TRAVELING)
@@ -151,7 +151,7 @@ public class JobService
     /// <summary>
     /// 実行中JOBへキャンセル要求を送信する。
     /// </summary>
-    public void CancelCurrentJob()
+    public static void CancelCurrentJob()
     {
         // CancellationTokenへキャンセル通知
         AppState.CancellationTokenSource?.Cancel();
@@ -166,7 +166,7 @@ public class JobService
     /// true : 搬送中
     /// false : 待機中
     /// </returns>
-    public bool IsRunning()
+    public static bool IsRunning()
     {
         return AppState.OperationState == OperationState.TRAVELING;
     }
