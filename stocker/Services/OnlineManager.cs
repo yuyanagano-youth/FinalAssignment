@@ -75,23 +75,31 @@ public class OnlineManager
         // 接続状態をオンラインに変更
         AppState.ConnectionStatus = ConnectionStatus.ONLINE;
 
-        Console.WriteLine("オンライン化開始");
-        logger.Info("オンライン化開始");
-
         // 設備状態を待機中に設定
         AppState.OperationState = OperationState.IDLE;
 
-        // サーバーへオンライン通知を送信
-        await _notificationService.SendOnlineAsync(stockerId);
+        Console.WriteLine("オンライン化開始");
+        logger.Info("オンライン化開始");
 
-        // Listener開始
-        await _commandListener.StartListener();
+        try
+        {
+            // サーバーへオンライン通知を送信
+            await _notificationService.SendOnlineAsync(stockerId);
 
-        // ポーリング開始
-        await _pollingService.StartPolling();
+            // Listener開始
+            await _commandListener.StartListener();
 
-        Console.WriteLine("オンライン化完了\n");
-        logger.Info("オンライン化完了");
+            // ポーリング開始
+            await _pollingService.StartPolling();
+
+            Console.WriteLine("オンライン化完了\n");
+            logger.Info("オンライン化完了");
+        }
+        catch
+        {
+            // オンライン化失敗のためオフラインへ戻す
+            await GoOfflineAsync();
+        }
 
     }
 

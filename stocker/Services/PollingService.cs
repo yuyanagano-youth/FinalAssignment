@@ -130,6 +130,7 @@ public class PollingService
                 return response;
             }
 
+            Console.WriteLine("JOB情報を取得しました");
             // 取得したJOBをCommandDispatcherへ渡して実行を依頼
             await _dispatcher.Dispatch( response.Job);
             
