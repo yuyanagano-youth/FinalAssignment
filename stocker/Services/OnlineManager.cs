@@ -121,7 +121,7 @@ public class OnlineManager
 
         // ポーリング停止
         _pollingService.StopPolling();
-        Console.WriteLine("ポーリング停止");
+        Console.WriteLine("Polling停止");
 
         // 搬送中のJOBがある場合は、オフライン化に伴いキャンセルする
         if(AppState.OperationState == OperationState.TRAVELING)

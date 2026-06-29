@@ -18,13 +18,14 @@ public class ApiClient
     public ApiClient()
     {
         // HttpClient生成
-        _httpClient = new HttpClient();
+        _httpClient = new HttpClient
+        {
+            // 共通タイムアウト
+            Timeout = TimeSpan.FromSeconds(20),
 
-        // 共通タイムアウト
-        _httpClient.Timeout = TimeSpan.FromSeconds(20);
-
-        // サーバーのベースURL設定
-        _httpClient.BaseAddress = new Uri("http://172.16.7.6:5028/");
+            // サーバーのベースURL設定
+            BaseAddress = new Uri("http://172.16.7.6:5028/")
+        };
     }
 
 
